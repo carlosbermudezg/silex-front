@@ -41,6 +41,7 @@ const App = () => {
     const newMode = event.target.checked;
     setDarkMode(newMode);
     localStorage.setItem('darkMode', newMode); // Guardar la preferencia en localStorage
+    window.dispatchEvent(new Event('localStorageChange'));
   };
 
   // Función para obtener la ubicación actual del cobrador
@@ -74,7 +75,7 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline /> {/* Aplica el tema globalmente */}
-      <div style={{ paddingBottom: '56px' }}>
+      <div>
         {/* Toggle de modo oscuro y claro con iconos */}
         <Box sx={{ position: 'fixed', top: 10, right: 10, zIndex: 1000 }}>
           <Switch

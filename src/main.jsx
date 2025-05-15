@@ -5,10 +5,12 @@ import App from './App';
 import 'leaflet/dist/leaflet.css';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import { Toaster } from 'react-hot-toast'; // Importar react-hot-toast
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <BrowserRouter>
     <App />
+    <Toaster />
   </BrowserRouter>
 );
