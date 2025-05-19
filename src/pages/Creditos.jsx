@@ -45,7 +45,6 @@ const Creditos = () => {
 
       const data = res.data.data;
       const pages = res.data.totalPages || 1;
-      console.log(data)
 
       const transformados = data.map((credito) => ({
         id: credito.id,

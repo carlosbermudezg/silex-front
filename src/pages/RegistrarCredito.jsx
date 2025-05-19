@@ -12,7 +12,11 @@ import {
   Snackbar,
   Alert,
   Autocomplete,
+  FormGroup,
+  FormControlLabel,
+  Checkbox
 } from '@mui/material';
+
 import { ArrowBack } from '@mui/icons-material';
 import axios from 'axios';
 import { useTheme } from '@mui/material/styles';
@@ -27,7 +31,7 @@ const RegistrarCredito = () => {
     rutaId: '',
     clienteId: '',
     productoId: '',
-    monto: '',
+    monto: 0,
     plazo: '',
     frecuencia_pago: '',
   });
@@ -42,6 +46,10 @@ const RegistrarCredito = () => {
   const [snackbar, setSnackbar] = useState({ open: false, message: '', severity: 'success' });
   const [clienteSearch, setClienteSearch] = useState('');
   const [errors, setErrors] = useState({ monto: '', plazo: '', frecuencia_pago: '' });
+  const [valorCuota, setValorCuota] = useState(0);
+  const [valorEntregar, setValorEntregar] = useState(0);
+  const [primeraCuota, setPrimeraCuota] = useState(true);
+  const [render, setRender] = useState(false)
 
   const navigate = useNavigate();
   const theme = useTheme();
@@ -53,6 +61,43 @@ const RegistrarCredito = () => {
     validarToken(navigate);
     fetchRutas();
   }, []);
+
+  useEffect(()=>{
+    const getValorCuota = (plazo, frecuencia)=>{
+      if(plazo && frecuencia) {
+
+        const monto = parseFloat(form.monto)+((parseFloat(form.monto) * config.interes)/100);
+
+        if(frecuencia == 'diario'){
+          const cuota = monto / plazo
+          setValorCuota(cuota)
+        }
+        if(frecuencia == 'semanal'){
+          const semanas = Math.ceil(plazo / 7)
+          const cuota = monto / semanas
+          setValorCuota(cuota)
+        }
+        if(frecuencia == 'quincenal'){
+          const semanas = Math.ceil(plazo / 15)
+          const cuota = monto / semanas
+          setValorCuota(cuota)
+        }
+        if(frecuencia == 'mensual'){
+          setValorCuota(monto)
+        }
+      }else{
+        setValorCuota(0)
+      }
+      setRender(!render)
+    }
+    getValorCuota(form.plazo, form.frecuencia_pago)
+  },[primeraCuota, form.monto, form.plazo, form.frecuencia_pago])
+
+  useEffect(()=>{
+    const monto = parseFloat(form.monto);
+    const entrega = primeraCuota ? monto - valorCuota : monto;
+    setValorEntregar(entrega);
+  }, [render])
 
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
@@ -374,7 +419,7 @@ const RegistrarCredito = () => {
               inputProps={{ min: 0, step: '0.01' }}
             />
             {
-              form.monto && <Typography variant='caption'> Total crédito: ${parseFloat(form.monto)+((parseFloat(form.monto) * config.interes)/100)}</Typography>
+              <Typography variant='caption'> Total crédito: ${parseFloat(form.monto)+((parseFloat(form.monto) * config.interes)/100)}</Typography>
             }
 
             <TextField
@@ -408,6 +453,15 @@ const RegistrarCredito = () => {
                 </MenuItem>
               ))}
             </TextField>
+            <FormGroup>
+              <FormControlLabel control={<Checkbox checked={primeraCuota} onClick={ ()=> setPrimeraCuota(!primeraCuota) } />} label="Abonar primera cuota" />
+            </FormGroup>
+            {
+              (form.plazo && form.frecuencia_pago) && <Typography variant='caption'> Valor de cuota: ${ valorCuota }</Typography>
+            }
+            {
+              <Typography variant='caption'> Valor a entregar: ${ valorEntregar }</Typography>
+            }
 
             <Button variant="contained" fullWidth onClick={handleSubmit} disabled={loading}>
               {loading ? <CircularProgress size={24} /> : 'Guardar Crédito'}

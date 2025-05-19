@@ -111,8 +111,6 @@ const RegistrarCliente = () => {
     });
   };
 
-  console.log(form)
-
   const handleSubmit = async () => {
     try {
       setLoading(true);

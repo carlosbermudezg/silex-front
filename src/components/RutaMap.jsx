@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { MapContainer, TileLayer, Marker, Polyline, Tooltip } from 'react-leaflet';
 import L from 'leaflet';
-import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, useTheme } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, useTheme, MenuItem } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material'; // Icono de X
+import axios from 'axios';
 
 // Icono numerado dinámicamente
 const createNumberedIcon = (number, color) =>
@@ -11,7 +12,7 @@ const createNumberedIcon = (number, color) =>
     className: '',
     iconSize: [24, 24],
     iconAnchor: [12, 24],
-  });
+});
 
 // Función greedy para ordenar por cercanía desde un punto inicial
 const ordenarPorCercania = (puntos, ubicacionInicial) => {
@@ -50,22 +51,53 @@ const ordenarPorCercania = (puntos, ubicacionInicial) => {
 };
 
 // Función para determinar el color del marcador basado en las cuotas atrasadas
-const getMarkerColor = (cuotasAtrasadas) => {
-  if (cuotasAtrasadas > 6) return '#f33232';
-  if (cuotasAtrasadas > 3) return '#e8e147';
+const getMarkerColor = async (fechaPago) => {
+  const config = await getConfigDefault();
+  const atraso = calcularDiasAtraso(fechaPago)
+  if (atraso >= config.days_to_red) return '#f33232';
+  if (atraso >= config.days_to_yellow) return '#e8e147';
   return '#65c129';
 };
 
-const RutaMap = ({ puntos }) => {
+const getConfigDefault = async ()=>{
+  const token = localStorage.getItem('token');
+  const response = await axios.get(`${import.meta.env.VITE_API_URL}/config/default`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+  return response.data
+}
+
+function calcularDiasAtraso(fechaPago) {
+  const fechaPagoDate = new Date(fechaPago);
+  const fechaActual = new Date();
+
+  // Resetear horas para comparar solo fechas (opcional)
+  fechaPagoDate.setHours(0, 0, 0, 0);
+  fechaActual.setHours(0, 0, 0, 0);
+
+  const milisegundosPorDia = 1000 * 60 * 60 * 24;
+  const diferenciaEnMilisegundos = fechaActual - fechaPagoDate;
+  const diasAtraso = Math.floor(diferenciaEnMilisegundos / milisegundosPorDia);
+
+  // Si la fecha de pago es en el futuro, no hay atraso
+  return diasAtraso > 0 ? diasAtraso : 0;
+}
+
+const RutaMap = ({ setRender, puntos }) => {
   const [rutaOrdenada, setRutaOrdenada] = useState([]);
+  const [rutaOrdenadaConColor, setRutaOrdenadaConColor] = useState([]);
   const [ubicacionActual, setUbicacionActual] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [valorPagar, setValorPagar] = useState('');
+  const [metodoPago, setMetodoPago] = useState('')
   const [puntoSeleccionado, setPuntoSeleccionado] = useState(null); // Guardar el punto seleccionado para el pago
   const [boxVisible, setBoxVisible] = useState(false); // Controlar visibilidad del Box flotante
   const [boxContent, setBoxContent] = useState(null); // Contenido del Box flotante
   const mapRef = useRef();
   const theme = useTheme(); // Obtener el tema actual
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
     // Obtener ubicación actual
@@ -79,6 +111,23 @@ const RutaMap = ({ puntos }) => {
       { enableHighAccuracy: true }
     );
   }, []);
+
+  useEffect(() => {
+    const asignarColores = async () => {
+      const nuevaRuta = await Promise.all(
+        rutaOrdenada.map(async (punto) => {
+          const markerColor = await getMarkerColor(punto.fechaPago);
+          return { ...punto, markerColor };
+        })
+      );
+      setRutaOrdenadaConColor(nuevaRuta);
+    };
+  
+    if (rutaOrdenada.length > 0) {
+      asignarColores();
+    }
+  }, [rutaOrdenada]);
+  
 
   useEffect(() => {
     if (ubicacionActual && puntos.length > 0) {
@@ -108,9 +157,21 @@ const RutaMap = ({ puntos }) => {
     setBoxVisible(false); // Cerrar el Box flotante al cerrar el modal
   };
 
-  const handlePagar = () => {
-    // Aquí iría la lógica para registrar el pago, por ejemplo, enviarlo al backend
-    console.log(`Pago de ${valorPagar} registrado para ${puntoSeleccionado.nombre}`);
+  const handlePagar = async() => {
+    
+    const pago = {
+      creditoId : puntoSeleccionado.creditoId,
+      valor : valorPagar,
+      metodoPago: metodoPago
+    }
+
+    const response = 
+    await axios.post(`${import.meta.env.VITE_API_URL}creditos/pagar`, pago, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then((response)=> console.log(response.data))
+    .catch(error => console.log(error))
 
     // Cerrar el modal después de registrar el pago
     handleCloseModal();
@@ -123,7 +184,9 @@ const RutaMap = ({ puntos }) => {
         <div style={{ flex: 1 }}>
           <div><strong>Nombre: </strong>{punto.nombre}</div>
           <div><strong>Cuota: </strong>${punto.cuota}</div>
+          <div><strong>Abonado: </strong>${punto.monto_pagado}</div>
           <div><strong>Atrasos: </strong>{punto.cuotasAtrasadas} {punto.cuotasAtrasadas === 1 ? 'cuota' : 'cuotas'}</div>
+          <div><strong>Fecha: </strong>{punto.fechaPago.split("T")[0]}</div>
         </div>
 
         {/* Botón Pagar al lado derecho */}
@@ -179,24 +242,21 @@ const RutaMap = ({ puntos }) => {
         )}
 
         {/* Marcadores para las paradas de la ruta (excluyendo la ubicación actual) */}
-        {rutaOrdenada.slice(1).map((punto, index) => {
-          const markerColor = getMarkerColor(punto.cuotasAtrasadas); // Obtener el color según las cuotas atrasadas
+        {rutaOrdenadaConColor.slice(1).map((punto, index) => (
+          <Marker
+          key={index}
+          position={[punto.lat, punto.lng]}
+          icon={createNumberedIcon(index + 1, punto.markerColor)}
+          eventHandlers={{
+            click: () => handleMarkerClick(punto),
+          }}
+          >
+          <Tooltip direction="top" offset={[0, -10]}>
+            {punto.nombre} - ${punto.cuota}
+          </Tooltip>
+          </Marker>
+        ))}
 
-          return (
-            <Marker
-              key={index}
-              position={[punto.lat, punto.lng]}
-              icon={createNumberedIcon(index + 1, markerColor)} // Usar el color adecuado
-              eventHandlers={{
-                click: () => handleMarkerClick(punto),
-              }}
-            >
-              <Tooltip direction="top" offset={[0, -10]}>
-                {punto.nombre} - ${punto.cuota}
-              </Tooltip>
-            </Marker>
-          );
-        })}
 
         {/* Traza la ruta (incluyendo la ubicación actual) */}
         {rutaOrdenada.length > 1 && (
@@ -264,6 +324,21 @@ const RutaMap = ({ puntos }) => {
             onChange={(e) => setValorPagar(e.target.value)}
             variant="outlined"
           />
+          <TextField
+              fullWidth
+              select
+              label="Método de pago"
+              name="metodoPago"
+              value={metodoPago}
+              onChange={(e)=> setMetodoPago(e.target.value)}
+            >
+                <MenuItem key="1" value="Efectivo">
+                  Efectivo
+                </MenuItem>
+                <MenuItem key="2" value="Transferencia">
+                  Transferencia
+                </MenuItem>
+            </TextField>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseModal} color="primary">

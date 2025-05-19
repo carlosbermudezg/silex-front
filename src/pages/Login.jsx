@@ -12,12 +12,21 @@ function Login() {
   const navigate = useNavigate();
 
   const handleLogin = async () => {
+    if(email == '' || password == '') {
+      return toast.error('Los campos no pueden estar vacíos', { duration: 1000, position: 'bottom-center', });
+    }
+    // Mostrar el toast de carga
+    const loadingToast = toast.loading('Iniciando sesión...', {
+      position: 'bottom-center',
+      duration: 1000, // El toast permanecerá hasta que se cierre manualmente
+    });
     try {
       const res = await axios.post(`${import.meta.env.VITE_API_URL}login`, { email, password })
       localStorage.setItem('token', res.data.token);
+      toast.success('Inicio de sesión exitoso!', { id: loadingToast, duration: 1000, position: 'bottom-center', });
       navigate('/home');
     } catch (err) {
-      toast.error('Credenciales inválidas', { duration: 1000, position: 'bottom-center', });
+      toast.error('Credenciales inválidas', { id: loadingToast, duration: 1000, position: 'bottom-center', });
     }
   };
 
