@@ -41,8 +41,14 @@ const Home = () => {
         <Button variant="contained" color="secondary" onClick={() => navigate('/registro-gasto')}>
           Registrar Gasto
         </Button>
-        <Button variant="contained" color="success" onClick={() => navigate('/ruta')}>
+        <Button variant="contained" color="success" onClick={() => navigate('/pagos')}>
+          Comprobantes
+        </Button>
+        {/* <Button variant="contained" color="success" onClick={() => navigate('/ruta')}>
           Ruta
+        </Button> */}
+        <Button variant="contained" color="success" onClick={() => navigate('/rutamapa')}>
+          Ruta Mapa
         </Button>
 
         {/* Botón para abrir diálogo */}

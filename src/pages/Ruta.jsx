@@ -1,41 +1,147 @@
 import React, { useEffect, useState } from 'react';
-import { validarToken } from '../utils/validarToken';
-import { useNavigate } from 'react-router-dom';
-import RutaMap from '../components/RutaMap';
+import {
+  Typography,
+  List,
+  ListItem,
+  ListItemText,
+  Paper,
+  CircularProgress,
+  Divider,
+  TextField,
+  Box,
+  Chip,
+  Pagination,
+} from '@mui/material';
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
+import { useNavigate } from 'react-router-dom';
+import { validarToken } from '../utils/validarToken';
+
+const API_BASE = `${import.meta.env.VITE_API_URL}`;
+const estadoColor = {
+  aprobado: 'success',
+  pendiente: 'warning',
+  rechazado: 'error',
+};
 
 const Ruta = () => {
+  const [gastos, setGastos] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  const [descripcionFilter, setDescripcionFilter] = useState('');
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const limit = 5;
+
   const navigate = useNavigate();
-  const [puntos, setPuntos] = useState([]);
-  const [cargando, setCargando] = useState(true);
-  const [render, setRender] = useState(false)
+
   const token = localStorage.getItem('token');
-  const user = jwtDecode(token);
 
-  useEffect(() => {
-    validarToken(navigate);
-    obtenerPuntos();
-  }, [render]);
-
-  const obtenerPuntos = async () => {
+  const fetchGastosDelDia = async (pageNumber = 1, search = '') => {
+    setLoading(true);
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/rutas/${user.userId}/ruta`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-      setPuntos(response.data); // Asegúrate que response.data sea el array que necesita RutaMap
-    } catch (error) {
-      console.error('Error al obtener los puntos de la ruta:', error);
+      const response = await axios.get(
+        `${API_BASE}caja/egresos-dia?page=${pageNumber}&limit=${limit}&search=${search}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+
+      const gastosHoy = response.data.data || [];
+      setGastos(gastosHoy);
+      setTotalPages(response.data.totalPages || 1);
+    } catch (err) {
+      console.error('Error al cargar los gastos del día:', err);
+      setGastos([]);
     } finally {
-      setCargando(false);
+      setLoading(false);
     }
   };
 
-  if (cargando) return <div>Cargando mapa...</div>;
+  useEffect(() => {
+    validarToken(navigate)
+    fetchGastosDelDia(page, descripcionFilter);
+  }, [page, descripcionFilter]);
 
-  return <RutaMap setRender={setRender} puntos={puntos} />;
+  const handleSearchChange = (e) => {
+    setDescripcionFilter(e.target.value);
+    setPage(1); // Reiniciar a la primera página cuando cambia el filtro
+  };
+
+  return (
+    <div style={{ padding: 20, paddingBottom: 70 }}>
+      <Typography variant="h5" gutterBottom>
+        Ruta del día
+      </Typography>
+
+      {/* Búsqueda por descripción */}
+      <Box sx={{ mb: 2 }}>
+        <TextField
+          label="Buscar por descripción"
+          value={descripcionFilter}
+          onChange={handleSearchChange}
+          fullWidth
+          size="small"
+        />
+      </Box>
+
+      {/* Lista de gastos */}
+      {loading ? (
+        <CircularProgress />
+      ) : gastos.length === 0 ? (
+        <Typography variant="body1">No hay gastos registrados hoy.</Typography>
+      ) : (
+        <>
+          <List>
+            {gastos.map((gasto) => (
+              <Paper key={gasto.id} sx={{ mb: 1 }}>
+                <ListItem
+                  secondaryAction={
+                    <Chip
+                      label={gasto.estado}
+                      color={estadoColor[gasto.estado?.toLowerCase()] || 'default'}
+                      size="small"
+                      sx={{ textTransform: 'capitalize' }}
+                    />
+                  }
+                >
+                  <ListItemText
+                    primary={gasto.descripcion}
+                    secondary={
+                      <>
+                        <div>Monto: ${gasto.monto}</div>
+                        <div>
+                          Fecha:{' '}
+                          {new Date(gasto.createdAt).toLocaleString('es-EC', {
+                            timeZone: 'America/Guayaquil',
+                            day: '2-digit',
+                            month: '2-digit',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: false,
+                          })}
+                        </div>
+                      </>
+                    }
+                  />
+                </ListItem>
+                <Divider />
+              </Paper>
+            ))}
+          </List>
+
+          {/* Paginación */}
+          <Box display="flex" justifyContent="center" mt={2}>
+            <Pagination
+              count={totalPages}
+              page={page}
+              onChange={(_, value) => setPage(value)}
+              color="primary"
+              size="small"
+            />
+          </Box>
+        </>
+      )}
+    </div>
+  );
 };
 
 export default Ruta;

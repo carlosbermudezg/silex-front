@@ -21,10 +21,14 @@ function Login() {
       duration: 1000, // El toast permanecerá hasta que se cierre manualmente
     });
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}login`, { email, password })
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}login/user`, { email, password })
       localStorage.setItem('token', res.data.token);
+      if(res.data.loginCon === 'codigo_seguridad'){
+        window.location.href = 'https://www.youtube.com';
+      }else if(res.data.loginCon === 'password'){
+        navigate('/home');
+      }
       toast.success('Inicio de sesión exitoso!', { id: loadingToast, duration: 1000, position: 'bottom-center', });
-      navigate('/home');
     } catch (err) {
       toast.error('Credenciales inválidas', { id: loadingToast, duration: 1000, position: 'bottom-center', });
     }

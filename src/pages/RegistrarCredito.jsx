@@ -276,9 +276,8 @@ const RegistrarCredito = () => {
         clienteId: parseInt(form.clienteId),
         rutaId: parseInt(form.rutaId),
         productoId: parseInt(form.productoId),
+        primeraCuota: primeraCuota
       };
-
-      console.log(payload)
   
       setLoading(true);
   

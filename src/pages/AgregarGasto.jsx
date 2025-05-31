@@ -47,7 +47,6 @@ const AgregarGasto = () => {
         const response = await axios.get(`${API_BASE}config/gasto-categories`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        console.log(response)
         setCategorias(response.data.categorias);
       } catch (error) {
         console.error('Error al obtener las categorías:', error);

@@ -4,6 +4,7 @@ import L from 'leaflet';
 import { Dialog, DialogActions, DialogContent, DialogTitle, Button, TextField, useTheme, MenuItem } from '@mui/material';
 import { Close as CloseIcon } from '@mui/icons-material'; // Icono de X
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 // Icono numerado dinámicamente
 const createNumberedIcon = (number, color) =>
@@ -85,8 +86,9 @@ function calcularDiasAtraso(fechaPago) {
   return diasAtraso > 0 ? diasAtraso : 0;
 }
 
-const RutaMap = ({ setRender, puntos }) => {
+const RutaMap = ({ render, setRender, puntos }) => {
   const [rutaOrdenada, setRutaOrdenada] = useState([]);
+  const [renderMap, setRenderMap] = useState(false)
   const [rutaOrdenadaConColor, setRutaOrdenadaConColor] = useState([]);
   const [ubicacionActual, setUbicacionActual] = useState(null);
   const [openModal, setOpenModal] = useState(false);
@@ -123,20 +125,21 @@ const RutaMap = ({ setRender, puntos }) => {
       setRutaOrdenadaConColor(nuevaRuta);
     };
   
-    if (rutaOrdenada.length > 0) {
+    if (rutaOrdenada.length >= 0) {
       asignarColores();
     }
   }, [rutaOrdenada]);
   
 
   useEffect(() => {
-    if (ubicacionActual && puntos.length > 0) {
+    if (ubicacionActual && puntos.length >= 0) {
       // Excluimos la ubicación actual del listado de puntos para la numeración
       const puntosSinUbicacion = puntos.map(punto => ({ ...punto }));
       const orden = ordenarPorCercania(puntosSinUbicacion, ubicacionActual);
       setRutaOrdenada(orden);
+      console.log('renderMap')
     }
-  }, [ubicacionActual, puntos]);
+  }, [ubicacionActual, puntos, renderMap]);
 
   useEffect(() => {
     if (ubicacionActual && mapRef.current) {
@@ -161,8 +164,9 @@ const RutaMap = ({ setRender, puntos }) => {
     
     const pago = {
       creditoId : puntoSeleccionado.creditoId,
-      valor : valorPagar,
-      metodoPago: metodoPago
+      valor : Number(valorPagar),
+      metodoPago: metodoPago,
+      location: `${ubicacionActual.lat}`+','+`${ubicacionActual.lng}`
     }
 
     const response = 
@@ -170,8 +174,17 @@ const RutaMap = ({ setRender, puntos }) => {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }).then((response)=> console.log(response.data))
-    .catch(error => console.log(error))
+    }).then((response)=> {
+      toast.success('Se ha registrado el pago con éxito', {position:'bottom-center'})
+      setRender(!render)
+      setTimeout(()=>{
+        setRenderMap(!renderMap)
+      },1500)
+    })
+    .catch((error) => {
+      toast.error(error.response.data.error, {position:'bottom-center'})
+      console.log(error)
+    })
 
     // Cerrar el modal después de registrar el pago
     handleCloseModal();
@@ -183,8 +196,8 @@ const RutaMap = ({ setRender, puntos }) => {
         {/* Información de Nombre y Cuota en el lado izquierdo */}
         <div style={{ flex: 1 }}>
           <div><strong>Nombre: </strong>{punto.nombre}</div>
-          <div><strong>Cuota: </strong>${punto.cuota}</div>
-          <div><strong>Abonado: </strong>${punto.monto_pagado}</div>
+          <div><strong>Cuota: </strong>${punto.cuota.toFixed(2)}</div>
+          <div><strong>Abonado: </strong>${punto.monto_pagado.toFixed(2)}</div>
           <div><strong>Atrasos: </strong>{punto.cuotasAtrasadas} {punto.cuotasAtrasadas === 1 ? 'cuota' : 'cuotas'}</div>
           <div><strong>Fecha: </strong>{punto.fechaPago.split("T")[0]}</div>
         </div>

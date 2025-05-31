@@ -14,7 +14,9 @@ import Gastos from './pages/Gastos';
 import Caja from './pages/Caja';
 import RegistrarCliente from './pages/RegistrarCliente';
 import RegistrarCredito from './pages/RegistrarCredito';
+import RutaMapa from './pages/RutaMapa';
 import Ruta from './pages/Ruta';
+import Pagos from './pages/Pagos';
 
 const App = () => {
   // Estado para el modo oscuro
@@ -104,7 +106,9 @@ const App = () => {
               <Route path="/caja" element={<Caja />} />
               <Route path="/registrar-cliente" element={<RegistrarCliente />} />
               <Route path="/registrar-credito" element={<RegistrarCredito />} />
-              <Route path="/ruta" element={<Ruta ubicacionCobrador={ubicacionCobrador} />} />
+              <Route path="/pagos" element={<Pagos />} />
+              <Route path="/rutamapa" element={<RutaMapa ubicacionCobrador={ubicacionCobrador} />} />
+              <Route path="/ruta" element={<Ruta />} />
             </Route>
           </Route>
         </Routes>

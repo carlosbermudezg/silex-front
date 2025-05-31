@@ -47,7 +47,7 @@ const Caja = () => {
   const fecha = dayjs();
   const diaSemana = fecha.format('dddd'); // Por ejemplo: 'lunes'
   const fechaCompleta = fecha.format('DD/MM/YYYY HH:mm');
-  const capitalizar = (str) => str.charAt(0).toUpperCase() + str.slice(1);
+  const capitalizar = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
 
   // Obtener los movimientos para la caja
   const getMovimientos = async (cajaId, page, limit) => {
