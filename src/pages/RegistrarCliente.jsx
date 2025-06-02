@@ -14,7 +14,6 @@ import {
   Alert,
 } from '@mui/material';
 import axios from 'axios';
-import { validarToken } from '../utils/validarToken';
 import { useNavigate } from 'react-router-dom';
 import { ArrowBack } from '@mui/icons-material';
 import MapaCoordenadas from '../components/MapaCoordenadas';
@@ -47,7 +46,6 @@ const RegistrarCliente = () => {
 
   // Obtener ubicación al iniciar
   useEffect(() => {
-    validarToken(navigate)
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const coords = `${pos.coords.latitude},${pos.coords.longitude}`;

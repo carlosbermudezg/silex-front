@@ -17,7 +17,6 @@ import {
 import { ArrowBack } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { validarToken } from '../utils/validarToken';
 
 const API_BASE = `${import.meta.env.VITE_API_URL}`;
 
@@ -41,7 +40,6 @@ const AgregarGasto = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    validarToken(navigate);
     const fetchCategorias = async () => {
       try {
         const response = await axios.get(`${API_BASE}config/gasto-categories`, {

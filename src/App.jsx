@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme, CssBaseline, Switch, Box } from '@mui/material'; // Importar Switch y Box
 import { Brightness7, Brightness4 } from '@mui/icons-material'; // Importar los iconos de Sol y Luna
 import Login from './pages/Login';
@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import Logout from './pages/Logout';
 import MainLayout from './layout/MainLayout';
 import ProtectedRoutes from './components/ProtectedRoutes';
+import Clientes from './pages/Clientes';
 import Creditos from './pages/Creditos';
 import InfoCredito from './pages/InfoCredito';
 import AgregarGasto from './pages/AgregarGasto';
@@ -17,11 +18,14 @@ import RegistrarCredito from './pages/RegistrarCredito';
 import RutaMapa from './pages/RutaMapa';
 import Ruta from './pages/Ruta';
 import Pagos from './pages/Pagos';
+import { validarToken } from './utils/validarToken';
+
 
 const App = () => {
   // Estado para el modo oscuro
   const [darkMode, setDarkMode] = useState(false);
   const [ubicacionCobrador, setUbicacionCobrador] = useState(null);
+  const [isAuth, setIsAuth] = useState(validarToken());
 
   // Configuración del tema, dinámicamente según el modo
   const theme = createTheme({
@@ -70,9 +74,15 @@ const App = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  // console.log(ubicacionCobrador)
+  useEffect(() => {
+    // Actualiza isAuth cuando el token cambie
+    const interval = setInterval(() => {
+      setIsAuth(validarToken());
+    }, 1000); // Se verifica cada segundo para mantener el estado actualizado
 
-  const isAuth = true; // Esto lo puedes conectar con tu lógica de autenticación
+    return () => clearInterval(interval); // Limpia el intervalo cuando el componente se desmonte
+  }, []); // Solo se ejecuta una vez al montarse
+
 
   return (
     <ThemeProvider theme={theme}>
@@ -93,12 +103,13 @@ const App = () => {
 
         <Routes>
           <Route>
-            <Route path="/" element={<Login />} />
+            <Route path="/" element={isAuth ? <Navigate to="/home" /> : <Login mode={darkMode} />} />
             <Route path="/logout" element={<Logout />} />
           </Route>
           <Route element={<MainLayout />}>
             <Route element={<ProtectedRoutes isAuth={isAuth} redirectTo="/" />}>
               <Route path="/home" element={<Home />} />
+              <Route path="/clientes" element={<Clientes />} />
               <Route path="/creditos" element={<Creditos />} />
               <Route path="/info-credito/:id" element={<InfoCredito />} />
               <Route path="/gastos" element={<Gastos />} />

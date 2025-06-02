@@ -15,8 +15,6 @@ import {
 } from '@mui/material';
 import { Download } from '@mui/icons-material';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
-import { validarToken } from '../utils/validarToken';
 import toast from 'react-hot-toast';
 
 const API_BASE = `${import.meta.env.VITE_API_URL}`;
@@ -30,8 +28,6 @@ const Pagos = () => {
 
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-
-    const navigate = useNavigate();
 
     const token = localStorage.getItem('token');
     const user = jwtDecode(token);
@@ -51,7 +47,6 @@ const Pagos = () => {
     };
 
     // Obtener el comprobante de pago en pdf
-    
     const downloadComprobante = async (id) => {
         try {
         const response = await axios.get(`${API_BASE}caja/comprobante/${id}`, {
@@ -117,7 +112,6 @@ const Pagos = () => {
     };
 
     useEffect(() => {
-    validarToken(navigate)
         const get = async()=>{
             await obtenerRuta()
         }

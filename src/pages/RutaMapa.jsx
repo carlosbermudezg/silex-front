@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { validarToken } from '../utils/validarToken';
 import { useNavigate } from 'react-router-dom';
 import RutaMap from '../components/RutaMap';
 import axios from 'axios';
@@ -14,7 +13,6 @@ const RutaMapa = () => {
   const user = jwtDecode(token);
 
   useEffect(() => {
-    validarToken(navigate);
     obtenerPuntos();
   }, [render]);
 
@@ -26,7 +24,6 @@ const RutaMapa = () => {
         },
       });
       setPuntos(response.data); // Asegúrate que response.data sea el array que necesita RutaMap
-      console.log(response.data)
     } catch (error) {
       console.error('Error al obtener los puntos de la ruta:', error);
     } finally {

@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { jwtDecode } from 'jwt-decode';
 import {
   Typography,
   TextField,
@@ -11,12 +12,12 @@ import {
   List,
   ListItem,
   ListItemText,
-  Divider,
+  Chip,
 } from '@mui/material';
 import { InfoOutlined } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import { validarToken } from '../utils/validarToken';
 import axios from 'axios';
+import toast from 'react-hot-toast';
 
 const API_BASE = `${import.meta.env.VITE_API_URL}`;
 
@@ -24,17 +25,62 @@ const Creditos = () => {
   const [creditos, setCreditos] = useState([]);
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [config, setConfig] = useState({})
 
   const [clienteFilter, setClienteFilter] = useState('');
-  const [fechaDesde, setFechaDesde] = useState('');
-  const [fechaHasta, setFechaHasta] = useState('');
 
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
 
   const token = localStorage.getItem('token');
+  const user = jwtDecode(token);
+  const verCredito = user.permisos.includes('viewcr')
   const navigate = useNavigate();
+
+  const obtenerDiasAtraso = (cuotas) => {
+    const hoy = new Date();
+    hoy.setHours(0, 0, 0, 0); // Ignorar hora
+  
+    // Filtrar cuotas impagas cuya fecha ya pasó
+    const impagasVencidas = cuotas.filter(c => {
+      const fecha = new Date(c.fecha_pago);
+      fecha.setHours(0, 0, 0, 0);
+      return c.estado === "impago" && fecha < hoy;
+    });
+  
+    if (impagasVencidas.length === 0) {
+      return 0;
+    }
+  
+    const masAtrasada = impagasVencidas.reduce((masVieja, actual) => {
+      const f1 = new Date(masVieja.fecha_pago);
+      const f2 = new Date(actual.fecha_pago);
+      f1.setHours(0, 0, 0, 0);
+      f2.setHours(0, 0, 0, 0);
+      return f2 < f1 ? actual : masVieja;
+    });
+  
+    const fechaCuota = new Date(masAtrasada.fecha_pago);
+    fechaCuota.setHours(0, 0, 0, 0); // Ignorar hora
+  
+    const msPorDia = 1000 * 60 * 60 * 24;
+    const diasAtraso = Math.floor((hoy - fechaCuota) / msPorDia);
+  
+    return diasAtraso;
+  };  
+
+  const getConfigDefault = async ()=>{
+    await axios.get(`${import.meta.env.VITE_API_URL}/config/default`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then((response)=>{
+      setConfig(response.data)
+    }).catch((error)=>{
+      toast.error('Fallo de configuración')
+    })
+  }
 
   const fetchCreditos = async (pagina = 1) => {
     setLoading(true);
@@ -67,40 +113,16 @@ const Creditos = () => {
   };
 
   useEffect(() => {
-    validarToken(navigate);
-    fetchCreditos(page);
+    const get = async()=>{
+      await getConfigDefault();
+      await fetchCreditos(page);
+    }
+    get();
   }, [page]);
-
-  const filtrarCreditos = () => {
-    let resultado = [...creditos];
-
-    if (clienteFilter.trim() !== '') {
-      resultado = resultado.filter((c) =>
-        c.clienteNombre.toLowerCase().includes(clienteFilter.toLowerCase())
-      );
-    }
-
-    if (fechaDesde) {
-      resultado = resultado.filter((c) => new Date(c.createdAt) >= new Date(fechaDesde));
-    }
-
-    if (fechaHasta) {
-      resultado = resultado.filter((c) => new Date(c.createdAt) <= new Date(fechaHasta));
-    }
-
-    setFiltered(resultado);
-  };
-
-  const limpiarFiltros = () => {
-    setClienteFilter('');
-    setFechaDesde('');
-    setFechaHasta('');
-    setFiltered(creditos);
-  };
 
   // MODIFICADO: Enviamos el objeto completo por state
   const handleVerDetalle = (credito) => {
-    navigate(`/info-credito/${credito.id}`, { state: credito });
+    navigate(`/info-credito/${credito.id}`, { state: {credito, configDefault: config} });
   };
 
   return (
@@ -117,30 +139,6 @@ const Creditos = () => {
           fullWidth
           size="small"
         />
-        <TextField
-          label="Desde"
-          type="date"
-          value={fechaDesde}
-          onChange={(e) => setFechaDesde(e.target.value)}
-          InputLabelProps={{ shrink: true }}
-          size="small"
-        />
-        <TextField
-          label="Hasta"
-          type="date"
-          value={fechaHasta}
-          onChange={(e) => setFechaHasta(e.target.value)}
-          InputLabelProps={{ shrink: true }}
-          size="small"
-        />
-        <Box display="flex" gap={1}>
-          <Button variant="contained" size="small" onClick={filtrarCreditos} fullWidth>
-            Aplicar
-          </Button>
-          <Button variant="outlined" size="small" onClick={limpiarFiltros} fullWidth>
-            Limpiar
-          </Button>
-        </Box>
       </Box>
 
       {loading ? (
@@ -149,29 +147,45 @@ const Creditos = () => {
         <Typography variant="body1">No hay créditos para mostrar.</Typography>
       ) : (
         <List>
-          {filtered.map((credito) => (
-            <Paper key={credito.id} sx={{ mb: 1, position: 'relative', paddingTop: '32px' }}>
-              <IconButton
-                onClick={() => handleVerDetalle(credito)}
-                sx={{ position: 'absolute', top: 4, left: 4 }}
-              >
-                <InfoOutlined />
-              </IconButton>
+          {filtered.map((credito) => {
+            const diasAtraso = obtenerDiasAtraso(credito.detalles.cuotas)
+            let color = 'success'
+            if (diasAtraso >= config.days_to_yellow) {
+              color = 'warning'
+            }
+            if (diasAtraso >= config.days_to_red) {
+              color ='error'
+            }
+
+            return(
+            <Paper key={credito.id} sx={{ mb: 1, position: 'relative' }}>
+              {
+                verCredito &&
+                <IconButton
+                  onClick={() => handleVerDetalle(credito)}
+                  sx={{ position: 'absolute', top: 2, right: 2, zIndex:1 }}
+                  color='primary'
+                >
+                  <InfoOutlined />
+                </IconButton>
+              }
               <ListItem>
                 <ListItemText
-                  primary={`Cliente: ${credito.clienteNombre}`}
+                  primary={`${credito.clienteNombre}`}
                   secondary={
                     <>
-                      <div>Monto: ${credito.monto}</div>
-                      <div>Fecha: {new Date(credito.createdAt).toLocaleDateString()}</div>
-                      <div>Estado: {credito.estado}</div>
+                      <label>Saldo: $ {(Number(credito.detalles.saldo_capital) + Number(credito.detalles.saldo_interes)).toFixed(2)}</label><br />
+                      <label>Fecha: {new Date(credito.createdAt).toLocaleDateString()}</label><br />
+                      <label>Estado: {credito.estado}</label>
                     </>
                   }
                 />
               </ListItem>
-              <Divider />
+              <div style={{position:'absolute', right: 7, bottom: 7}}>
+                <Typography variant='caption' color='textDisabled'>Dias Atraso: <Chip label={diasAtraso} color={color} size='small' /></Typography>
+              </div>
             </Paper>
-          ))}
+          )})}
         </List>
       )}
 

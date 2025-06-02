@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { jwtDecode } from 'jwt-decode';
 import {
   Box,
   Typography,
@@ -9,32 +10,54 @@ import {
   Divider,
   Grid,
   useTheme,
-  Snackbar,
-  Alert,
   Pagination,
   Chip,
   Select,
   MenuItem,
   FormControl,
   InputLabel,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  TextField
 } from '@mui/material';
-import { ArrowBack, Image as ImageIcon } from '@mui/icons-material';
+import axios from 'axios';
+import { ArrowBack, Image as ImageIcon, Download, CurrencyExchange } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { validarToken } from '../utils/validarToken';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
 import 'slick-carousel/slick/slick-theme.css';
+import toast from 'react-hot-toast';
+const API_BASE = `${import.meta.env.VITE_API_URL}`;
 
 const InfoCredito = () => {
-  const { state: credito } = useLocation();
+  const location = useLocation();
+  const { credito, configDefault } = location.state || {};
+  console.log(credito)
+  const [config, setConfig] = useState({})
+  const [montoMinimo, setMontoMinimo] = useState(0)
+  const [montoMaximo, setMontoMaximo] = useState(0)
+  const [plazo, setPlazo] = useState(0)
+  const [plazoMaximo, setPlazoMaximo] = useState(0)
+  const [plazoMinimo, setPlazoMinimo] = useState(0)
+  const [frecuencia, setFrecuencia] = useState('')
+  const porcentajeRenovacion = Number(configDefault.porcentaje_minimo_novacion)
+  const deudaInicial = Number(credito.detalles.monto) + Number(credito.detalles.monto_interes_generado)
+  const deudaMinima = deudaInicial * porcentajeRenovacion / 100
+
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(null);
-  const [error, setError] = useState('');
   const [page, setPage] = useState(1);
   const [pagePagos, setPagePagos] = useState(1);
+  const [valorRenovacion, setValorRenovacion] = useState(0)
+  const [openModal, setOpenModal] = useState(false);
   const [filtroEstado, setFiltroEstado] = useState('todos');
   const cuotasPorPagina = 5;
   const pagosPorPagina = 5;
+  const token = localStorage.getItem('token');
+  const user = jwtDecode(token);
+  const renovarCredito = user.permisos.includes('mknovcr')
 
   const theme = useTheme();
   const isDarkMode = theme.palette.mode === 'dark';
@@ -47,9 +70,74 @@ const InfoCredito = () => {
     slidesToScroll: 1,
   };
 
-   useEffect(()=>{
-      validarToken(navigate)
-    },[])
+  const renewCredito = async()=>{
+    
+    if(deudaMinima < (Number(credito.detalles.saldo_capital) + Number(credito.detalles.saldo_interes))){
+      return toast.error(`El valor adeudado supera el valor permitido de deuda para renovar: $ ${deudaMinima.toFixed(2)}.`, {position:'bottom-center'})
+    }
+    
+    if(valorRenovacion < montoMinimo){
+      return toast.error(`El valor de renovación no puede ser menor de $ ${montoMinimo.toFixed(2)}.`, {position:'bottom-center'})
+    }
+
+    if(valorRenovacion > montoMaximo){
+      return toast.error(`El valor de renovación no superar $ ${montoMaximo.toFixed(2)}.`, {position:'bottom-center'})
+    }
+
+
+
+  }
+
+  // Obtener el comprobante de pago en pdf
+  const downloadComprobante = async (id) => {
+    try {
+    const response = await axios.get(`${API_BASE}caja/comprobante/${id}`, {
+        responseType: 'blob', 
+        headers: {
+        Authorization: `Bearer ${token}`,
+        },
+    });
+
+    const blob = new Blob([response.data], { type: 'application/pdf' });
+    const url = window.URL.createObjectURL(blob);
+
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', `comprobante_pago_${id}.pdf`);
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    window.URL.revokeObjectURL(url);
+    } catch (error) {
+    console.error('Error al descargar el comprobante:', error);
+    }
+  };
+
+  //Obtener la configuracion de ruta por usuario
+  const getRutaConfig = async()=>{
+    await axios.get(`${API_BASE}config/ruta/${credito.detalles.cliente.rutaId}`, {
+      headers: {
+      Authorization: `Bearer ${token}`,
+      },
+    }).then((response)=>{
+      console.log(response.data)
+      const monto_minimo = Number(response.data.monto_minimo) + (Number(credito.detalles.saldo_capital) + Number(credito.detalles.saldo_interes))
+      const monto_maximo = Number(response.data.monto_maximo)
+      setPlazoMaximo(response.data.plazo_maximo)
+      setPlazoMinimo(response.data.plazo_minimo)
+      setMontoMinimo(monto_minimo)
+      setMontoMaximo(monto_maximo)
+      setConfig(response.data)
+    }).catch( error => toast.error('Error al obtener la configuración', {position:'bottom-center'}))
+  }
+
+  useEffect(()=>{
+    const get = async()=>{
+      await getRutaConfig()
+    }
+    get()
+  },[])
 
   if (!credito) {
     return (
@@ -61,20 +149,22 @@ const InfoCredito = () => {
   }
 
   const cuotas = credito.detalles.cuotas || [];
-  const pagos = credito.pagos || [];
+  const pagos = credito.detalles.pagos || [];
 
   const cuotasFiltradas = filtroEstado === 'todos'
     ? cuotas
     : cuotas.filter((cuota) => cuota.estado === filtroEstado);
 
   const totalPagesCuotas = Math.ceil(cuotasFiltradas.length / cuotasPorPagina);
-  const cuotasPaginadas = cuotasFiltradas.slice((page - 1) * cuotasPorPagina, page * cuotasPorPagina);
+  const cuotasOrdenadas = cuotasFiltradas.sort((a, b) => new Date(a.fecha_pago) - new Date(b.fecha_pago));
+  const cuotasPaginadas = cuotasOrdenadas.slice((page - 1) * cuotasPorPagina, page * cuotasPorPagina);
 
   const totalPagesPagos = Math.ceil(pagos.length / pagosPorPagina);
-  const pagosPaginados = pagos.slice((pagePagos - 1) * pagosPorPagina, pagePagos * pagosPorPagina);
+  const pagosOrdenados = pagos.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+  const pagosPaginados = pagosOrdenados.slice((pagePagos - 1) * pagosPorPagina, pagePagos * pagosPorPagina);
 
   return (
-    <Box p={2}>
+    <div style={{ padding: 15, paddingBottom: 80 }}>
       <Box
         sx={{
           position: 'fixed',
@@ -96,24 +186,37 @@ const InfoCredito = () => {
 
       <Card sx={{ mt: 8 }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
+          <Typography variant="body1" gutterBottom>
             Información del Crédito
           </Typography>
-          <Typography><strong>Cliente:</strong> {credito.clienteNombre} {credito.clienteApellido}</Typography>
-          <Typography><strong>Teléfono:</strong> {credito.detalles.cliente?.telefono}</Typography>
-          <Typography><strong>Dirección:</strong> {credito.detalles.cliente?.direccion}</Typography>
-          <Typography><strong>Identificación:</strong> {credito.detalles.cliente?.identificacion}</Typography>
-          <Typography><strong>Producto:</strong> {credito.detalles.producto?.nombre}</Typography>
-          <Typography><strong>Monto:</strong> ${credito.monto}</Typography>
-          <Typography><strong>Interés:</strong> {credito.detalles.interes}%</Typography>
-          <Typography><strong>Plazo:</strong> {credito.detalles.plazo} días</Typography>
-          <Typography><strong>Frecuencia:</strong> {credito.detalles.frecuencia_pago}</Typography>
-          <Typography><strong>Estado:</strong> {credito.estado}</Typography>
-          <Typography><strong>Fecha creación:</strong> {new Date(credito.createdAt).toLocaleDateString()}</Typography>
-          <Typography><strong>Vencimiento:</strong> {new Date(credito.detalles.fechaVencimiento).toLocaleDateString()}</Typography>
-
+          <Typography variant='body2'><strong>Cliente:</strong> {credito.clienteNombre} {credito.clienteApellido}</Typography>
+          <Typography variant='body2'><strong>Teléfono:</strong> {credito.detalles.cliente?.telefono}</Typography>
+          <Typography variant='body2'><strong>Dirección:</strong> {credito.detalles.cliente?.direccion}</Typography>
+          <Typography variant='body2'><strong>Identificación:</strong> {credito.detalles.cliente?.identificacion}</Typography>
+          <Typography variant='body2'><strong>Producto:</strong> {credito.detalles.producto?.nombre}</Typography>
+          <Typography variant='body2'><strong>Monto Prestado:</strong> $ {credito.monto}</Typography>
+          <Typography variant='body2'><strong>Interés:</strong> {credito.detalles.interes}%</Typography>
+          <Typography variant='body2'><strong>Monto a pagar:</strong> $ {(Number(credito.detalles.monto) + Number(credito.detalles.monto_interes_generado)).toFixed(2)}</Typography>
+          <Typography variant='body2'><strong>Saldo:</strong> $ {(Number(credito.detalles.saldo_capital) + Number(credito.detalles.saldo_interes)).toFixed(2)}</Typography>
+          <Typography variant='body2'><strong>Plazo:</strong> {credito.detalles.plazo} días</Typography>
+          <Typography variant='body2'><strong>Frecuencia:</strong> {credito.detalles.frecuencia_pago}</Typography>
+          <Typography variant='body2'><strong>Estado:</strong> {credito.estado}</Typography>
+          <Typography variant='body2'><strong>Fecha creación:</strong> {new Date(credito.createdAt).toLocaleDateString()}</Typography>
+          <Typography variant='body2'><strong>Vencimiento:</strong> {new Date(credito.detalles.fechaVencimiento).toLocaleDateString()}</Typography>
           <Divider sx={{ my: 2 }} />
-
+          {
+            renovarCredito &&
+            <>
+              <Button
+                  sx={{width:'100%', marginTop:1}}
+                  variant='contained'
+                  color='primary'
+                  startIcon={<CurrencyExchange></CurrencyExchange>}
+                  onClick={()=> setOpenModal(true)}
+              >Renovar Crédito</Button>
+              <Divider sx={{ my: 2 }} />
+            </>
+          }
           {/* Cuotas */}
           <Typography variant="subtitle1" gutterBottom>Cuotas</Typography>
 
@@ -128,9 +231,8 @@ const InfoCredito = () => {
               label="Filtrar por estado"
             >
               <MenuItem value="todos">Todos</MenuItem>
-              <MenuItem value="pendiente">Pendiente</MenuItem>
+              <MenuItem value="impago">Impago</MenuItem>
               <MenuItem value="pagado">Pagado</MenuItem>
-              <MenuItem value="vencido">Vencido</MenuItem>
             </Select>
           </FormControl>
 
@@ -142,7 +244,9 @@ const InfoCredito = () => {
                 Mostrando {((page - 1) * cuotasPorPagina) + 1} - {Math.min(page * cuotasPorPagina, cuotasFiltradas.length)} de {cuotasFiltradas.length} cuotas
               </Typography>
 
-              {cuotasPaginadas.map((cuota) => (
+              {cuotasPaginadas.map((cuota) => {
+                const color = cuota.estado === 'pagado' ? 'success' : 'warning'
+                return(
                 <Card
                   key={cuota.id}
                   sx={{
@@ -152,12 +256,13 @@ const InfoCredito = () => {
                   }}
                 >
                   <CardContent>
-                    <Typography><strong>Monto:</strong> ${cuota.monto}</Typography>
+                    <Typography><strong>Monto:</strong> $ {cuota.monto.toFixed(2)}</Typography>
                     <Typography><strong>Fecha:</strong> {new Date(cuota.fecha_pago).toLocaleDateString()}</Typography>
+                    <strong>Abonado: </strong><Chip color={color} size='small' label={`$ ${cuota.monto_pagado.toFixed(2)}`}></Chip>
                     <Typography><strong>Estado:</strong> {cuota.estado}</Typography>
                   </CardContent>
                 </Card>
-              ))}
+              )})}
               <Box display="flex" justifyContent="center" mt={2}>
                 <Pagination
                   count={totalPagesCuotas}
@@ -191,9 +296,26 @@ const InfoCredito = () => {
                   }}
                 >
                   <CardContent>
-                    <Typography><strong>Monto:</strong> ${pago.monto}</Typography>
-                    <Typography><strong>Fecha:</strong> {new Date(pago.fecha).toLocaleDateString()}</Typography>
-                    <Typography><strong>Método:</strong> {pago.metodo || 'No especificado'}</Typography>
+                    <Typography><strong>Monto: </strong>${pago.monto}</Typography>
+                    <Typography><strong>Fecha: </strong>
+                        {new Date(pago.createdAt).toLocaleString('es-EC', {
+                          timeZone: 'America/Guayaquil',
+                          day: '2-digit',
+                          month: '2-digit',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                          hour12: false,
+                        })}
+                    </Typography>
+                    <Typography><strong>Método: </strong> {pago.metodoPago || 'No especificado'}</Typography>
+                    <Button
+                        sx={{width:'100%', marginTop:1}}
+                        variant='contained'
+                        color='info'
+                        startIcon={<Download></Download>}
+                        onClick={()=> downloadComprobante(pago.id)}
+                    >Descargar</Button>
                   </CardContent>
                 </Card>
               ))}
@@ -218,7 +340,7 @@ const InfoCredito = () => {
           ) : (
             <Grid container spacing={1}>
               {credito.detalles.cliente.fotos.map((foto, i) => (
-                <Grid item key={i}>
+                <Grid key={i}>
                   <Chip
                     icon={<ImageIcon />}
                     label={`Foto ${i + 1}`}
@@ -266,12 +388,69 @@ const InfoCredito = () => {
         </Box>
       )}
 
-      <Snackbar open={!!error} autoHideDuration={4000} onClose={() => setError('')}>
-        <Alert severity="error" sx={{ width: '100%' }}>
-          {error}
-        </Alert>
-      </Snackbar>
-    </Box>
+      {/* Modal para renovar el credito */}
+      <Dialog open={openModal} onClose={()=> setOpenModal(false)}>
+        <DialogTitle>Renovación de crédito</DialogTitle>
+        <DialogContent>
+          <Typography variant='caption'>¿Está seguro que desea renovar este crédito?</Typography>
+          <section style={{display:'flex', flexDirection:'column', gap:10}}>
+            <TextField
+              autoFocus
+              margin="dense"
+              label="Valor de renovación"
+              size='small'
+              type="number"
+              fullWidth
+              value={valorRenovacion}
+              onChange={(e) => setValorRenovacion(e.target.value)}
+              variant="outlined"
+            />
+            <TextField
+              fullWidth
+              size='small'
+              label="Plazo en días"
+              name="plazo"
+              value={plazo}
+              onChange={(e)=> setPlazo(e.target.value)}
+              type="number"
+              inputProps={{ min: 1 }}
+            />
+            <TextField
+              fullWidth
+              size='small'
+              select
+              label="Frecuencia de pago"
+              name="frecuencia_pago"
+              value={frecuencia}
+              onChange={(e)=> setFrecuencia(e.target.value)}
+              disabled={!config}
+              // error={Boolean(errors.frecuencia_pago)}
+              // helperText={errors.frecuencia_pago}
+            >
+              {(config && config.frecuencia_pago ?
+                JSON.parse('["' + config.frecuencia_pago.replace(/[{}]/g, '').replace(/,/g, '","') + '"]') : []
+              ).map((frecuencia) => (
+                <MenuItem key={frecuencia} value={frecuencia}>
+                  {frecuencia}
+                </MenuItem>
+              ))}
+            </TextField>
+          </section>
+
+          <Typography variant='caption'>Deuda Actual: $ {(Number(credito.detalles.saldo_capital) + Number(credito.detalles.saldo_interes)).toFixed(2)}</Typography><br />
+          <Typography variant='caption'>Deuda permitida: $ {deudaMinima.toFixed(2)}</Typography><br />
+          <Typography variant='caption'>Valor a entregar: $ {valorRenovacion <= 0 ? 0 : ((valorRenovacion) - (Number(credito.detalles.saldo_capital) + Number(credito.detalles.saldo_interes)).toFixed(2))}</Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={()=> setOpenModal(false)} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={()=> renewCredito()} color="success">
+            Renovar
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </div>
   );
 };
 

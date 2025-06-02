@@ -21,7 +21,6 @@ import { ArrowBack } from '@mui/icons-material';
 import axios from 'axios';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
-import { validarToken } from '../utils/validarToken';
 import { jwtDecode } from 'jwt-decode';
 
 const API_BASE = import.meta.env.VITE_API_URL;
@@ -58,7 +57,6 @@ const RegistrarCredito = () => {
   const user = jwtDecode(token);
 
   useEffect(() => {
-    validarToken(navigate);
     fetchRutas();
   }, []);
 

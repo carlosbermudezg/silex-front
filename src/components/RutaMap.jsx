@@ -137,7 +137,6 @@ const RutaMap = ({ render, setRender, puntos }) => {
       const puntosSinUbicacion = puntos.map(punto => ({ ...punto }));
       const orden = ordenarPorCercania(puntosSinUbicacion, ubicacionActual);
       setRutaOrdenada(orden);
-      console.log('renderMap')
     }
   }, [ubicacionActual, puntos, renderMap]);
 

@@ -14,7 +14,6 @@ import {
 } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
-import { validarToken } from '../utils/validarToken';
 
 const API_BASE = `${import.meta.env.VITE_API_URL}`;
 const estadoColor = {
@@ -56,7 +55,6 @@ const Gastos = () => {
   };
 
   useEffect(() => {
-    validarToken(navigate)
     fetchGastosDelDia(page, descripcionFilter);
   }, [page, descripcionFilter]);
 

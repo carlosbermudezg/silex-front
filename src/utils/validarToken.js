@@ -1,10 +1,9 @@
 import { jwtDecode } from 'jwt-decode';
 
-export const validarToken = (navigate) => {
+export const validarToken = () => {
   const token = localStorage.getItem('token');
 
   if (!token) {
-    navigate('/');
     return false;
   }
 
@@ -15,14 +14,13 @@ export const validarToken = (navigate) => {
 
     if (exp < now) {
       localStorage.removeItem('token');
-      navigate('/');
       return false;
     }
 
     return true; // Token válido
   } catch (error) {
     localStorage.removeItem('token');
-    navigate('/');
+    console.log(error)
     return false;
   }
 };

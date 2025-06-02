@@ -10,15 +10,10 @@ import {
   DialogActions,
 } from '@mui/material';
 import { useNavigate } from 'react-router-dom';
-import { validarToken } from '../utils/validarToken';
 
 const Home = () => {
   const navigate = useNavigate();
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
-
-  React.useEffect(() => {
-    validarToken(navigate);
-  }, []);
 
   const handleLogout = () => {
     localStorage.removeItem('token');
@@ -41,6 +36,9 @@ const Home = () => {
         <Button variant="contained" color="secondary" onClick={() => navigate('/registro-gasto')}>
           Registrar Gasto
         </Button>
+        {/* <Button variant="contained" color="secondary" onClick={() => navigate('/gastos')}>
+          Gastos
+        </Button> */}
         <Button variant="contained" color="success" onClick={() => navigate('/pagos')}>
           Comprobantes
         </Button>
