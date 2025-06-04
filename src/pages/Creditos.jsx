@@ -90,7 +90,7 @@ const Creditos = () => {
       });
 
       const data = res.data.data;
-      const pages = res.data.totalPages || 1;
+      const pages = res.data.pagination.totalPages || 1;
 
       const transformados = data.map((credito) => ({
         id: credito.id,
@@ -191,11 +191,16 @@ const Creditos = () => {
 
       <Box display="flex" justifyContent="center" mt={2}>
         <Pagination
-          count={totalPages}
-          page={page}
-          onChange={(event, value) => setPage(value)}
-          color="primary"
-        />
+          sx={{width:'280px', marginTop:1, display:'flex', justifyContent:'center'}}
+            variant='outlined'
+            boundaryCount={1}
+            siblingCount={0}
+            shape='rounded'
+            count={totalPages}
+            page={page}
+            onChange={(event, value) => setPage(value)}
+            color="primary"
+          />
       </Box>
     </div>
   );
