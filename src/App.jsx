@@ -87,18 +87,19 @@ const App = () => {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline /> {/* Aplica el tema globalmente */}
-      <div>
+      <Box sx={{height:'100vh'}}>
         {/* Toggle de modo oscuro y claro con iconos */}
-        <Box sx={{ position: 'fixed', top: 10, right: 10, zIndex: 1000 }}>
-          <Switch
+        <Box sx={{ position: 'fixed', top: 15, right: 10, zIndex: 1000}}>
+          {/* <Switch
             checked={darkMode}
             onChange={toggleDarkMode}
-            icon={<Brightness7 />} // Icono para el modo claro (sol)
-            checkedIcon={<Brightness4 />} // Icono para el modo oscuro (luna)
+            icon={<Brightness7 sx={{fontSize:'16px'}} />} // Icono para el modo claro (sol)
+            checkedIcon={<Brightness4 sx={{fontSize:'16px'}} />} // Icono para el modo oscuro (luna)
             sx={{
               padding: '1px', // Aplica padding para evitar que los iconos sobresalgan
             }}
-          />
+            size='small'
+          /> */}
         </Box>
 
         <Routes>
@@ -123,7 +124,7 @@ const App = () => {
             </Route>
           </Route>
         </Routes>
-      </div>
+      </Box>
     </ThemeProvider>
   );
 };

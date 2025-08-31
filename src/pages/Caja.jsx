@@ -155,8 +155,8 @@ const Caja = () => {
               movimientos.map((mov) => {
                 let color, simbol;
                 if (mov.category === 'ingreso') {
-                  color = 'success';
-                  simbol = '+';
+                  mov.tipo === 'visita' ? color = 'primary' : color = 'success'
+                  simbol = mov.monto <= 0 ? '' : '+'
                 } else {
                   color = 'error';
                   simbol = '-';

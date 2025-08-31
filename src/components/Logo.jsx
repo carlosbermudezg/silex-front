@@ -12,11 +12,10 @@ const Logo = ()=>{
         <section style={{
             display: 'flex',
             justifyContent:'center',
-            alignItems:'center',
-            marginBottom:10
+            alignItems:'center'
         }}>
             {
-                mode == 'true' ? <img width={150} src='logo-d.png'></img> : <img width={150} src='logo-l.png'></img>
+                mode == 'true' ? <img width={130} src='logo-d.png'></img> : <img width={130} src='logo-l.png'></img>
             }
         </section>
     )
