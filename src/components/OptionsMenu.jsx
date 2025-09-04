@@ -3,7 +3,7 @@ import IconButton from '@mui/material/IconButton';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
-import { Logout, ToggleOn } from "@mui/icons-material";
+import { Brightness7, Brightness4, Logout } from "@mui/icons-material";
 import {
     Button,
     Typography,
@@ -12,10 +12,12 @@ import {
     DialogContent,
     DialogActions,
   } from '@mui/material';
+import { useThemeContext } from "../context/ThemeContext";
 
 const ITEM_HEIGHT = 48;
 
 export default function OptionsMenu() {
+  const { mode, toggleTheme } = useThemeContext()
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
@@ -28,9 +30,9 @@ export default function OptionsMenu() {
 
   const options = [
     {
-      title:'Cambiar tema',
-      onclick: '',
-      icon: <ToggleOn></ToggleOn>
+      title: mode === 'dark' ? 'Oscuro' : 'Claro',
+      onclick: toggleTheme,
+      icon: mode === 'dark' ? <Brightness4 color="info"></Brightness4> : <Brightness7 color="warning"></Brightness7>
     },
     {
       title:'Cerrar Sesión',

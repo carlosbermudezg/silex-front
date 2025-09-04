@@ -1,12 +1,8 @@
-import { useState } from "react";
+import { useThemeContext } from '../context/ThemeContext'
 
 const Logo = ()=>{
 
-    const [mode, setMode] = useState(localStorage.getItem('darkMode'))
-
-    window.addEventListener('localStorageChange', () => {
-        setMode(localStorage.getItem('darkMode'))
-    });
+    const { mode } = useThemeContext()
 
     return(
         <section style={{
@@ -15,7 +11,7 @@ const Logo = ()=>{
             alignItems:'center'
         }}>
             {
-                mode == 'true' ? <img width={130} src='logo-d.png'></img> : <img width={130} src='logo-l.png'></img>
+                mode === 'dark' ? <img width={130} src='logo-d.png'></img> : <img width={130} src='logo-l.png'></img>
             }
         </section>
     )

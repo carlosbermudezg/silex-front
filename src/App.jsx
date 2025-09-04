@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme, CssBaseline, Switch, Box } from '@mui/material'; // Importar Switch y Box
-import { Brightness7, Brightness4 } from '@mui/icons-material'; // Importar los iconos de Sol y Luna
 import Login from './pages/Login';
 import Home from './pages/Home';
+import { Box } from '@mui/material';
 import Logout from './pages/Logout';
 import MainLayout from './layout/MainLayout';
 import ProtectedRoutes from './components/ProtectedRoutes';
@@ -20,35 +19,9 @@ import Ruta from './pages/Ruta';
 import Pagos from './pages/Pagos';
 import { validarToken } from './utils/validarToken';
 
-
 const App = () => {
-  // Estado para el modo oscuro
-  const [darkMode, setDarkMode] = useState(false);
   const [ubicacionCobrador, setUbicacionCobrador] = useState(null);
-  const [isAuth, setIsAuth] = useState(validarToken());
-
-  // Configuración del tema, dinámicamente según el modo
-  const theme = createTheme({
-    palette: {
-      mode: darkMode ? 'dark' : 'light', // Establecer modo claro u oscuro
-    },
-  });
-
-  // Recuperar el estado del tema desde localStorage para mantener la preferencia
-  useEffect(() => {
-    const savedMode = localStorage.getItem('darkMode');
-    if (savedMode === 'true') {
-      setDarkMode(true);
-    }
-  }, []);
-
-  // Cambiar entre modo oscuro y claro
-  const toggleDarkMode = (event) => {
-    const newMode = event.target.checked;
-    setDarkMode(newMode);
-    localStorage.setItem('darkMode', newMode); // Guardar la preferencia en localStorage
-    window.dispatchEvent(new Event('localStorageChange'));
-  };
+  const [isAuth, setIsAuth] = useState(validarToken())
 
   // Función para obtener la ubicación actual del cobrador
   const obtenerUbicacion = () => {
@@ -57,8 +30,12 @@ const App = () => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         setUbicacionCobrador({ lat, lng });
+        console.log(pos)
       },
-      () => alert('No se pudo obtener la ubicación actual'),
+      (pos) => {
+        console.log(pos)
+        alert('No se pudo obtener la ubicación actual')
+      },
       { enableHighAccuracy: true }
     );
   };
@@ -85,47 +62,30 @@ const App = () => {
 
 
   return (
-    <ThemeProvider theme={theme}>
-      <CssBaseline /> {/* Aplica el tema globalmente */}
-      <Box sx={{height:'100vh'}}>
-        {/* Toggle de modo oscuro y claro con iconos */}
-        <Box sx={{ position: 'fixed', top: 15, right: 10, zIndex: 1000}}>
-          {/* <Switch
-            checked={darkMode}
-            onChange={toggleDarkMode}
-            icon={<Brightness7 sx={{fontSize:'16px'}} />} // Icono para el modo claro (sol)
-            checkedIcon={<Brightness4 sx={{fontSize:'16px'}} />} // Icono para el modo oscuro (luna)
-            sx={{
-              padding: '1px', // Aplica padding para evitar que los iconos sobresalgan
-            }}
-            size='small'
-          /> */}
-        </Box>
-
-        <Routes>
-          <Route>
-            <Route path="/" element={isAuth ? <Navigate to="/home" /> : <Login mode={darkMode} />} />
-            <Route path="/logout" element={<Logout />} />
+    <Box sx={{height:'100vh'}}>
+      <Routes>
+        <Route>
+          <Route path="/" element={isAuth ? <Navigate to="/home" /> : <Login/>} />
+          <Route path="/logout" element={<Logout />} />
+        </Route>
+        <Route element={<MainLayout />}>
+          <Route element={<ProtectedRoutes isAuth={isAuth} redirectTo="/" />}>
+            <Route path="/home" element={<Home />} />
+            <Route path="/clientes" element={<Clientes />} />
+            <Route path="/creditos" element={<Creditos />} />
+            <Route path="/info-credito/:id" element={<InfoCredito />} />
+            <Route path="/gastos" element={<Gastos />} />
+            <Route path="/registro-gasto" element={<AgregarGasto />} />
+            <Route path="/caja" element={<Caja />} />
+            <Route path="/registrar-cliente" element={<RegistrarCliente />} />
+            <Route path="/registrar-credito" element={<RegistrarCredito />} />
+            <Route path="/pagos" element={<Pagos />} />
+            <Route path="/rutamapa" element={<RutaMapa ubicacionCobrador={ubicacionCobrador} />} />
+            <Route path="/ruta" element={<Ruta />} />
           </Route>
-          <Route element={<MainLayout />}>
-            <Route element={<ProtectedRoutes isAuth={isAuth} redirectTo="/" />}>
-              <Route path="/home" element={<Home />} />
-              <Route path="/clientes" element={<Clientes />} />
-              <Route path="/creditos" element={<Creditos />} />
-              <Route path="/info-credito/:id" element={<InfoCredito />} />
-              <Route path="/gastos" element={<Gastos />} />
-              <Route path="/registro-gasto" element={<AgregarGasto />} />
-              <Route path="/caja" element={<Caja />} />
-              <Route path="/registrar-cliente" element={<RegistrarCliente />} />
-              <Route path="/registrar-credito" element={<RegistrarCredito />} />
-              <Route path="/pagos" element={<Pagos />} />
-              <Route path="/rutamapa" element={<RutaMapa ubicacionCobrador={ubicacionCobrador} />} />
-              <Route path="/ruta" element={<Ruta />} />
-            </Route>
-          </Route>
-        </Routes>
-      </Box>
-    </ThemeProvider>
+        </Route>
+      </Routes>
+    </Box>
   );
 };
 
