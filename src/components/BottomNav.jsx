@@ -17,10 +17,10 @@ const BottomNav = () => {
 
   const navItems = [
     { label: 'Inicio', icon: <HomeIcon />, path: '/home' },
-    { label: 'Clientes', icon: <People />, path: '/clientes' },
+    // { label: 'Clientes', icon: <People />, path: '/clientes' },
     { label: 'Créditos', icon: <PaidIcon />, path: '/creditos' },
     { label: 'Gastos', icon: <MoneyOffIcon />, path: '/gastos' },
-    // { label: 'Caja', icon: <AccountBalanceWalletIcon />, path: '/caja' },
+    { label: 'Caja', icon: <AccountBalanceWalletIcon />, path: '/caja' },
   ];
 
   return (

@@ -34,7 +34,6 @@ const API_BASE = `${import.meta.env.VITE_API_URL}`;
 const InfoCredito = () => {
   const location = useLocation();
   const { credito, configDefault } = location.state || {};
-  console.log(credito)
   const [config, setConfig] = useState({})
   const [montoMinimo, setMontoMinimo] = useState(0)
   const [montoMaximo, setMontoMaximo] = useState(0)

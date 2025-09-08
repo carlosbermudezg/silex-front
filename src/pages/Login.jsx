@@ -42,7 +42,7 @@ function Login() {
       alignItems: 'center',
       height: '100dvh',
       overflow: 'hidden',
-      backgroundColor: 'background.default',
+      backgroundColor: '#1a1a1aff',
       boxSizing: 'border-box',
       padding: 2,
     }}
