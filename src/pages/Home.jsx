@@ -101,7 +101,7 @@ const Home = () => {
   const capitalizar = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
 
   return (
-    <Box sx={{ p: 1.5, height:'100vh', display:'flex', flexDirection:'column', alignItems:'center', gap:1 }}>
+    <Box sx={{ p: 1.5, display:'flex', flexDirection:'column', alignItems:'center' }}>
       <Box sx={{width:'100%'}}>
       <Typography variant="h6" gutterBottom>
         Caja

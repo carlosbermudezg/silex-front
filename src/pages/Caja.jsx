@@ -43,7 +43,7 @@ const Caja = () => {
   const blue = '#2196f3'
   const purple = '#ba68c8'
   const green = '#81c784'
-  const gray = '#9e9e9e'
+  const gray = '#575757'
   const white = '#ffffff'
 
   const colorStatus = caja.estado == 'abierta' ? green : red
@@ -115,7 +115,7 @@ const Caja = () => {
   },[caja, page])
 
   return (
-    <Box display="flex" flexDirection="column" alignItems="center" mt={1} pb={8} pl={2} pr={2}>
+    <Box display="flex" flexDirection="column" alignItems="center" p={1.5} pb={8}>
       <Box sx={{width:'100%'}}>
       <Typography variant="h6" gutterBottom>
         Caja
@@ -144,7 +144,7 @@ const Caja = () => {
       </Typography>
       <Typography variant="caption">{`${capitalizar(diaSemana)}, ${fechaCompleta}`}</Typography>
 
-      <TableContainer component={Paper} sx={{ width: '100%', borderRadius:3, padding:1.5}}>
+      <TableContainer component={Paper} sx={{ width: '100%', borderRadius:3, padding:1}}>
         <Table size="small">
           <TableHead>
             <TableRow>
@@ -203,7 +203,7 @@ const Caja = () => {
         </Table>
       </TableContainer>
       <Pagination
-        sx={{zIndex:999999, width:'100%', borderRadius:3, display:'flex', justifyContent:'center', border: `1px solid ${gray}`, p:1, mt:1}}
+        sx={{width:'100%', borderRadius:3, display:'flex', justifyContent:'center', border: `1px solid ${gray}`, p:1, mt:1}}
         variant='outlined'
         boundaryCount={1}
         siblingCount={0}
