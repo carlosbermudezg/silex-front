@@ -158,7 +158,7 @@ const Home = () => {
         </Box>
       </Box>
       <Box sx={{width:'100%', display:'flex', flexDirection:'column', alignItems:'center', paddingTop:4}}>
-        <Typography variant='caption' color={gray}>Bienvenido, Banka 4</Typography>
+        <Typography variant='caption' color={gray}>Bienvenido, {user.name}</Typography>
         <Typography variant="caption" color={gray}>{`${capitalizar(diaSemana)}, ${fechaCompleta}`}</Typography>
       </Box>
     </Box>

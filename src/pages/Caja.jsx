@@ -3,10 +3,6 @@ import { jwtDecode } from 'jwt-decode';
 import {
   Box,
   Typography,
-  Card,
-  CardContent,
-  CircularProgress,
-  Alert,
   Table,
   TableBody,
   TableCell,
@@ -14,33 +10,43 @@ import {
   TableHead,
   TableRow,
   Paper,
-  TablePagination,
+  Button,
   Pagination
 } from '@mui/material';
+import IconApp from '../components/IconApp';
+import { DoubleArrow } from '@mui/icons-material';
 import axios from 'axios';
 import dayjs from 'dayjs';
-import 'dayjs/locale/es'; // Para español
+import 'dayjs/locale/es';
 import weekday from 'dayjs/plugin/weekday';
 import localeData from 'dayjs/plugin/localeData';
 dayjs.extend(weekday);
 dayjs.extend(localeData);
-dayjs.locale('es'); // Establece el idioma
+dayjs.locale('es');
 
-const API_BASE = `${import.meta.env.VITE_API_URL}`; // Cambia según tu IP
+const API_BASE = `${import.meta.env.VITE_API_URL}`;
 
 const Caja = () => {
-  const [caja, setCaja] = useState({});
+  const [caja, setCaja] = useState({id:0});
   const [movimientos, setMovimientos] = useState([]);
   const [turno, setTurno] = useState({id: 0});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-  const [page, setPage] = useState(1); // Página actual
-  const [rowsPerPage, setRowsPerPage] = useState(10); // Establecemos 10 registros por defecto
-  const [totalPages, setTotalPages] = useState(0); // Total de páginas
+  const [page, setPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10); 
+  const [totalPages, setTotalPages] = useState(0);
 
   // Usuario logueado
   const token = localStorage.getItem('token');
   const user = jwtDecode(token);
+
+  const red = '#ec407a'
+  const blue = '#2196f3'
+  const purple = '#ba68c8'
+  const green = '#81c784'
+  const gray = '#9e9e9e'
+  const white = '#ffffff'
+
+  const colorStatus = caja.estado == 'abierta' ? green : red
 
   // Fecha de hoy
   const fecha = dayjs();
@@ -49,13 +55,13 @@ const Caja = () => {
   const capitalizar = (str) => str?.charAt(0).toUpperCase() + str?.slice(1);
 
   // Obtener los movimientos para la caja
-  const getMovimientos = async (id, page, limit) => {
+  const getMovimientos = async (id, pageMov, limit) => {
     try {
       const res = await axios.get(`${API_BASE}caja/movimientos`, {
         headers: { Authorization: `Bearer ${token}` },
         params: {
           turnoId : id,
-          page: page, // El backend espera que la página comience en 1
+          page: pageMov, // El backend espera que la página comience en 1
           limit,
         },
       });
@@ -72,25 +78,23 @@ const Caja = () => {
       const response = await axios.get(`${API_BASE}caja/user/${user.userId}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      await obtenerTurno(response.data.id)
       setCaja(response.data);
-      await getMovimientos(response.data.id, page, rowsPerPage);
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Obtener el estado de la caja
+  // Obtener el turno activo
   const obtenerTurno = async (id) => {
     try {
       const response = await axios.get(`${API_BASE}caja/turno/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
       setTurno(response.data)
+      await getMovimientos(response.data.id, page, 10)
     } catch (err) {
       setTurno({})
       setMovimientos([])
-      setEgresosTurno([])
     }
   };
 
@@ -101,48 +105,46 @@ const Caja = () => {
       setLoading(false);
     };
     init();
-  }, [page, rowsPerPage]); // Ejecutar cuando cambie la página o las filas por página
+  }, [page, rowsPerPage]);
 
   useEffect(()=>{
     const get = async()=>{
-      await getMovimientos(turno.id, page, 10)
+      await obtenerTurno(caja.id)
     }
     get()
-  },[page, turno])
+  },[caja, page])
 
   return (
-    <Box display="flex" sx={{marginBottom:10}} flexDirection="column" alignItems="center" mt={5}>
-      <Card sx={{ minWidth: 300, width: '90%', maxWidth: 600, mb: 4 }}>
-        <CardContent>
-          <Typography variant="h5" gutterBottom>
-            Estado de la Caja
-          </Typography>
-          {loading ? (
-            <CircularProgress />
-          ) : (
-            <>
-              <Typography color={caja.estado === 'abierta' ? 'green' : 'error'}>
-                <strong>{capitalizar(caja.estado)}</strong>
-              </Typography>
-              <Typography>
-                Saldo: <strong>${caja.saldoActual}</strong>
-              </Typography>
-            </>
-          )}
-          {error && (
-            <Alert severity="error" sx={{ mt: 2 }}>
-              {error}
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
+    <Box display="flex" flexDirection="column" alignItems="center" mt={1} pb={8} pl={2} pr={2}>
+      <Box sx={{width:'100%'}}>
+      <Typography variant="h6" gutterBottom>
+        Caja
+      </Typography>
+        <Box sx={{display:'flex', gap: 1, flexWrap:'wrap', justifyContent:'center'}}>
+          <Button
+            children={
+            <Box sx={{display:'flex', alignItems:'center', width:'100%', justifyContent:'space-between', padding:2}}>
+              <IconApp route='/caja.png'></IconApp>
+              <Box>
+              <Typography sx={{fontSize:'12px', fontWeight:'bold'}}>Caja <label style={{color:colorStatus}}>{caja.estado}</label></Typography>
+              <Typography sx={{fontSize:'28px'}}>$ {caja.saldoActual}</Typography>
+              </Box>
+              <DoubleArrow fontSize='32px' sx={{color:colorStatus}}></DoubleArrow>
+            </Box>
+            }
+            sx={{width:'100%', height:'130px', fontSize:'40px', padding:0, border: `0px solid ${colorStatus}`, backgroundColor:'#05112e', color: white, borderRadius: 3}} 
+            variant="contained"
+            onClick={() => navigate('/caja')}
+          />
+        </Box>
+      </Box>
 
       <Typography variant="h6" mb={2}>
         Movimientos del Día
       </Typography>
       <Typography variant="caption">{`${capitalizar(diaSemana)}, ${fechaCompleta}`}</Typography>
 
-      <TableContainer component={Paper} sx={{ width: '90%', maxWidth: 1000 }}>
+      <TableContainer component={Paper} sx={{ width: '100%', borderRadius:3, padding:1.5}}>
         <Table size="small">
           <TableHead>
             <TableRow>
@@ -163,7 +165,7 @@ const Caja = () => {
                 }
                 return (
                   <TableRow key={mov.id}>
-                    <TableCell>
+                    <TableCell sx={{width:'80%'}}>
                       <Typography variant='caption'>{mov.descripcion}</Typography>
                       <br />
                       <Typography variant='caption'>
@@ -178,12 +180,12 @@ const Caja = () => {
                         })}
                       </Typography>
                     </TableCell>
-                    <TableCell>
-                      <Typography color={color} variant="caption">
+                    <TableCell sx={{p:0, textAlign:'right'}}>
+                      <Typography color={color} sx={{width:'100%', textAlign:'right'}} variant="caption">
                         {simbol} ${mov.monto}
                       </Typography>
                       <br />
-                      <Typography color="textSecondary" variant="caption">
+                      <Typography color="textSecondary" variant="caption" sx={{width:'100%', textAlign:'right'}}>
                         ${mov.saldo}
                       </Typography>
                     </TableCell>
@@ -201,7 +203,7 @@ const Caja = () => {
         </Table>
       </TableContainer>
       <Pagination
-      sx={{width:'280px', marginTop:1, display:'flex', justifyContent:'center'}}
+        sx={{zIndex:999999, width:'100%', borderRadius:3, display:'flex', justifyContent:'center', border: `1px solid ${gray}`, p:1, mt:1}}
         variant='outlined'
         boundaryCount={1}
         siblingCount={0}
