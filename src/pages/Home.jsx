@@ -78,13 +78,13 @@ const Home = () => {
       textColor: white,
       link: '/pagos'
     },
-    // {
-    //   name: 'Enrutamiento',
-    //   icon: '/lista.png',
-    //   color: red,
-    //   textColor: white,
-    //   link: '/ruta'
-    // },
+    {
+      name: 'Enrutamiento',
+      icon: '/lista.png',
+      color: red,
+      textColor: white,
+      link: '/ruta'
+    },
     {
       name: 'Ruta',
       icon: '/ruta3.png',

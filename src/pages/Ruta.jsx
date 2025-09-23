@@ -9,11 +9,14 @@ import {
   Divider,
   TextField,
   Box,
-  Chip,
+  Dialog, DialogActions, DialogContent,
+  DialogTitle,
   Pagination,
+  Button, MenuItem
 } from '@mui/material';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { jwtDecode } from 'jwt-decode';
+import toast from 'react-hot-toast';
 
 const API_BASE = `${import.meta.env.VITE_API_URL}`;
 const estadoColor = {
@@ -23,44 +26,95 @@ const estadoColor = {
 };
 
 const Ruta = () => {
-  const [gastos, setGastos] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  const [descripcionFilter, setDescripcionFilter] = useState('');
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-  const limit = 5;
-
-  const navigate = useNavigate();
-
   const token = localStorage.getItem('token');
+  const user = jwtDecode(token);
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(0);
+  const [puntos, setPuntos] = useState([]);
+  const [render, setRender] = useState(false)
+  const [cargando, setCargando] = useState(true);
+  const [openModal, setOpenModal] = useState(false);
+  const [valorPagar, setValorPagar] = useState('');
+  const [metodoPago, setMetodoPago] = useState('');
+  const [ubicacionActual, setUbicacionActual] = useState(null);
+  const [puntoSeleccionado, setPuntoSeleccionado] = useState(null);
 
-  const fetchGastosDelDia = async (pageNumber = 1, search = '') => {
-    setLoading(true);
-    try {
-      const response = await axios.get(
-        `${API_BASE}caja/egresos-dia?page=${pageNumber}&limit=${limit}&search=${search}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+  console.log(puntos)
 
-      const gastosHoy = response.data.data || [];
-      setGastos(gastosHoy);
-      setTotalPages(response.data.totalPages || 1);
-    } catch (err) {
-      console.error('Error al cargar los gastos del día:', err);
-      setGastos([]);
-    } finally {
-      setLoading(false);
+  const handleCloseModal = () => {
+    setOpenModal(false);
+    setValorPagar('');
+    setPuntoSeleccionado(null);
+  };
+
+  const handleOpenModal = (punto) => {
+    setPuntoSeleccionado(punto);
+    setOpenModal(true);
+  };
+
+  const handlePagar = async() => {
+    
+    const pago = {
+      creditoId : puntoSeleccionado.creditoId,
+      valor : Number(valorPagar),
+      metodoPago: metodoPago,
+      location: `${ubicacionActual.lat}`+','+`${ubicacionActual.lng}`
     }
+
+    console.log(pago)
+
+    const response = await axios.post(`${import.meta.env.VITE_API_URL}creditos/pagar`, pago, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then((response)=> {
+      toast.success('Se ha registrado el pago con éxito', {position:'bottom-center'})
+      setRender(!render)
+    })
+    .catch((error) => {
+      toast.error(error.response.data.error, {position:'bottom-center'})
+      console.log(error)
+    })
+
+    // Cerrar el modal después de registrar el pago
+    handleCloseModal();
   };
 
   useEffect(() => {
-    fetchGastosDelDia(page, descripcionFilter);
-  }, [page, descripcionFilter]);
+    // Obtener ubicación actual
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setUbicacionActual({ lat, lng });
+      },
+      () => alert('No se pudo obtener la ubicación actual'),
+      { enableHighAccuracy: true }
+    );
+  }, []);
 
   const handleSearchChange = (e) => {
     setDescripcionFilter(e.target.value);
     setPage(1); // Reiniciar a la primera página cuando cambia el filtro
+  };
+
+  useEffect(() => {
+    obtenerPuntos();
+  }, [render]);
+
+  const obtenerPuntos = async () => {
+    try {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/rutas/${user.userId}/ruta`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      setPuntos(response.data); // Asegúrate que response.data sea el array que necesita RutaMap
+    } catch (error) {
+      console.error('Error al obtener los puntos de la ruta:', error);
+    } finally {
+      setCargando(false);
+    }
   };
 
   return (
@@ -70,53 +124,56 @@ const Ruta = () => {
       </Typography>
 
       {/* Búsqueda por descripción */}
-      <Box sx={{ mb: 2 }}>
+      {/* <Box sx={{ mb: 2 }}>
         <TextField
           label="Buscar por descripción"
-          value={descripcionFilter}
+          value=""
           onChange={handleSearchChange}
           fullWidth
           size="small"
         />
-      </Box>
+      </Box> */}
 
       {/* Lista de gastos */}
-      {loading ? (
+      {cargando ? (
         <CircularProgress />
-      ) : gastos.length === 0 ? (
-        <Typography variant="body1">No hay gastos registrados hoy.</Typography>
+      ) : puntos.length === 0 ? (
+        <Typography variant="body1">No hay clientes por cobrar hoy.</Typography>
       ) : (
         <>
           <List>
-            {gastos.map((gasto) => (
-              <Paper key={gasto.id} sx={{ mb: 1 }}>
+            {puntos.map((punto) => (
+              <Paper key={punto.creditoId} sx={{ mb: 1 }}>
                 <ListItem
                   secondaryAction={
-                    <Chip
-                      label={gasto.estado}
-                      color={estadoColor[gasto.estado?.toLowerCase()] || 'default'}
-                      size="small"
-                      sx={{ textTransform: 'capitalize' }}
-                    />
+                    <Button
+                      onClick={()=> handleOpenModal(punto)}
+                      variant='contained'
+                      color='success'
+                      sx={{
+                        color:'#fff'
+                      }}
+                    >
+                      Pagar
+                    </Button>
                   }
                 >
                   <ListItemText
-                    primary={gasto.descripcion}
                     secondary={
                       <>
-                        <div>Monto: ${gasto.monto}</div>
+                        <div>{punto.nombre}</div>
                         <div>
                           Fecha:{' '}
-                          {new Date(gasto.createdAt).toLocaleString('es-EC', {
+                          {new Date(punto.fechaPago).toLocaleString('es-EC', {
                             timeZone: 'America/Guayaquil',
                             day: '2-digit',
                             month: '2-digit',
                             year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: false,
                           })}
                         </div>
+                        <Typography color='secondary'>Monto: ${punto.cuota.toFixed(2)}</Typography>
+                        <Typography color='info'>Abonado: ${punto.monto_pagado.toFixed(2)}</Typography>
+                        <Typography color='primary'>Atrasos: {punto.cuotasAtrasadas}</Typography>
                       </>
                     }
                   />
@@ -138,6 +195,45 @@ const Ruta = () => {
           </Box>
         </>
       )}
+      {/* Modal para registrar el pago */}
+      <Dialog open={openModal} onClose={handleCloseModal}>
+        <DialogTitle>Ingresar el valor a pagar</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Valor a pagar"
+            type="number"
+            fullWidth
+            value={valorPagar}
+            onChange={(e) => setValorPagar(e.target.value)}
+            variant="outlined"
+          />
+          <TextField
+              fullWidth
+              select
+              label="Método de pago"
+              name="metodoPago"
+              value={metodoPago}
+              onChange={(e)=> setMetodoPago(e.target.value)}
+            >
+                <MenuItem key="1" value="Efectivo">
+                  Efectivo
+                </MenuItem>
+                <MenuItem key="2" value="Transferencia">
+                  Transferencia
+                </MenuItem>
+            </TextField>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handlePagar} color="primary">
+            Aceptar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
