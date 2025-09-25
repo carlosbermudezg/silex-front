@@ -39,8 +39,6 @@ const Ruta = () => {
   const [ubicacionActual, setUbicacionActual] = useState(null);
   const [puntoSeleccionado, setPuntoSeleccionado] = useState(null);
 
-  console.log(puntos)
-
   const handleCloseModal = () => {
     setOpenModal(false);
     setValorPagar('');

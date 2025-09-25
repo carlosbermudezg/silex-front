@@ -45,13 +45,21 @@ const InfoCredito = () => {
   const deudaInicial = Number(credito.detalles.monto) + Number(credito.detalles.monto_interes_generado)
   const deudaMinima = deudaInicial * porcentajeRenovacion / 100
 
+  console.log(credito)
+
   const navigate = useNavigate();
   const [selectedImage, setSelectedImage] = useState(null);
   const [page, setPage] = useState(1);
   const [pagePagos, setPagePagos] = useState(1);
   const [valorRenovacion, setValorRenovacion] = useState(0)
   const [openModal, setOpenModal] = useState(false);
+  const [openModalPago, setOpenModalPago] = useState(false);
   const [filtroEstado, setFiltroEstado] = useState('todos');
+  const [valorPagar, setValorPagar] = useState('');
+  const [metodoPago, setMetodoPago] = useState('')
+  const [puntoSeleccionado, setPuntoSeleccionado] = useState(null);
+  const [render, setRender] = useState(false);
+  const [ubicacionActual, setUbicacionActual] = useState(null);
   const cuotasPorPagina = 5;
   const pagosPorPagina = 5;
   const token = localStorage.getItem('token');
@@ -68,6 +76,19 @@ const InfoCredito = () => {
     slidesToShow: 1,
     slidesToScroll: 1,
   };
+
+  useEffect(() => {
+    // Obtener ubicación actual
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        setUbicacionActual({ lat, lng });
+      },
+      () => alert('No se pudo obtener la ubicación actual'),
+      { enableHighAccuracy: true }
+    );
+  }, []);
 
   const renewCredito = async()=>{
     
@@ -86,6 +107,44 @@ const InfoCredito = () => {
 
 
   }
+
+  const handleOpenModal = (punto) => {
+    setPuntoSeleccionado(punto);
+    setOpenModalPago(true);
+  };
+
+  const handleCloseModal = () => {
+    setOpenModalPago(false);
+    setValorPagar('');
+    setPuntoSeleccionado(null);
+  };
+
+  const handlePagar = async() => {
+    
+    const pago = {
+      creditoId : puntoSeleccionado.id,
+      valor : Number(valorPagar),
+      metodoPago: metodoPago,
+      location: `${ubicacionActual.lat}`+','+`${ubicacionActual.lng}`
+    }
+
+    const response = 
+    await axios.post(`${import.meta.env.VITE_API_URL}creditos/pagar`, pago, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }).then((response)=> {
+      toast.success('Se ha registrado el pago con éxito', {position:'bottom-center'})
+      setRender(!render)
+    })
+    .catch((error) => {
+      toast.error(error.response.data.error, {position:'bottom-center'})
+      console.log(error)
+    })
+
+    // Cerrar el modal después de registrar el pago
+    handleCloseModal();
+  };
 
   // Obtener el comprobante de pago en pdf
   const downloadComprobante = async (id) => {
@@ -234,6 +293,15 @@ const InfoCredito = () => {
               <MenuItem value="pagado">Pagado</MenuItem>
             </Select>
           </FormControl>
+          <Button
+            variant='contained'
+            color='success'
+            sx={{
+              color: '#fff',
+              marginLeft: '10px'
+            }}
+            onClick={()=> handleOpenModal(credito)}
+          >Pagar</Button>
 
           {cuotasFiltradas.length === 0 ? (
             <Typography>No hay cuotas registradas.</Typography>
@@ -446,6 +514,46 @@ const InfoCredito = () => {
           </Button>
           <Button onClick={()=> renewCredito()} color="success">
             Renovar
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Modal para registrar el pago */}
+      <Dialog open={openModalPago} onClose={handleCloseModal}>
+        <DialogTitle>Ingresar el valor a pagar</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="Valor a pagar"
+            type="number"
+            fullWidth
+            value={valorPagar}
+            onChange={(e) => setValorPagar(e.target.value)}
+            variant="outlined"
+          />
+          <TextField
+              fullWidth
+              select
+              label="Método de pago"
+              name="metodoPago"
+              value={metodoPago}
+              onChange={(e)=> setMetodoPago(e.target.value)}
+            >
+                <MenuItem key="1" value="Efectivo">
+                  Efectivo
+                </MenuItem>
+                <MenuItem key="2" value="Transferencia">
+                  Transferencia
+                </MenuItem>
+            </TextField>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseModal} color="primary">
+            Cancelar
+          </Button>
+          <Button onClick={handlePagar} color="primary">
+            Aceptar
           </Button>
         </DialogActions>
       </Dialog>
