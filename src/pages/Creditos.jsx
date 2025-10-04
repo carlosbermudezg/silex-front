@@ -27,7 +27,7 @@ const Creditos = () => {
   const [loading, setLoading] = useState(true);
   const [config, setConfig] = useState({})
 
-  const [clienteFilter, setClienteFilter] = useState('');
+  const [search, setSearch] = useState('');
 
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
@@ -82,10 +82,14 @@ const Creditos = () => {
     })
   }
 
-  const fetchCreditos = async (pagina = 1) => {
+  const fetchCreditos = async (pagina = 1, search = '') => {
+    console.log({search})
+    if (search != ''){
+      setPage(1)
+    }
     setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE}creditos/creditos-impagos?page=${pagina}&limit=${limit}`, {
+      const res = await axios.get(`${API_BASE}creditos/creditos-impagos?page=${pagina}&limit=${limit}&search=${search}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -115,10 +119,10 @@ const Creditos = () => {
   useEffect(() => {
     const get = async()=>{
       await getConfigDefault();
-      await fetchCreditos(page);
+      await fetchCreditos(page, search);
     }
     get();
-  }, [page]);
+  }, [page, search]);
 
   // MODIFICADO: Enviamos el objeto completo por state
   const handleVerDetalle = (credito) => {
@@ -134,8 +138,8 @@ const Creditos = () => {
       <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
         <TextField
           label="Buscar por cliente"
-          value={clienteFilter}
-          onChange={(e) => setClienteFilter(e.target.value)}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
           fullWidth
           size="small"
         />
