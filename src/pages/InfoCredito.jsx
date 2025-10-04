@@ -216,7 +216,6 @@ const InfoCredito = () => {
   const totalPagesCuotas = Math.ceil(cuotasFiltradas.length / cuotasPorPagina);
   const cuotasOrdenadas = cuotasFiltradas.sort((a, b) => new Date(a.fecha_pago) - new Date(b.fecha_pago));
   const cuotasPaginadas = cuotasOrdenadas.slice((page - 1) * cuotasPorPagina, page * cuotasPorPagina);
-
   const totalPagesPagos = Math.ceil(pagos.length / pagosPorPagina);
   const pagosOrdenados = pagos.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
   const pagosPaginados = pagosOrdenados.slice((pagePagos - 1) * pagosPorPagina, pagePagos * pagosPorPagina);
@@ -255,7 +254,7 @@ const InfoCredito = () => {
           <Typography variant='body2'><strong>Monto Prestado:</strong> $ {credito.monto}</Typography>
           <Typography variant='body2'><strong>Interés:</strong> {credito.detalles.interes}%</Typography>
           <Typography variant='body2'><strong>Monto a pagar:</strong> $ {(Number(credito.detalles.monto) + Number(credito.detalles.monto_interes_generado)).toFixed(2)}</Typography>
-          <Typography variant='body2'><strong>Saldo:</strong> $ {(Number(credito.detalles.saldo_capital) + Number(credito.detalles.saldo_interes)).toFixed(2)}</Typography>
+          <Typography variant='body2'><strong>Saldo:</strong> $ {credito.detalles.saldo}</Typography>
           <Typography variant='body2'><strong>Plazo:</strong> {credito.detalles.plazo} días</Typography>
           <Typography variant='body2'><strong>Frecuencia:</strong> {credito.detalles.frecuencia_pago}</Typography>
           <Typography variant='body2'><strong>Estado:</strong> {credito.estado}</Typography>

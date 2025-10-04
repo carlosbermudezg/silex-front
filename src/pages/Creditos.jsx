@@ -174,7 +174,7 @@ const Creditos = () => {
                   primary={`${credito.clienteNombre}`}
                   secondary={
                     <>
-                      <label>Saldo: $ {(Number(credito.detalles.saldo_capital) + Number(credito.detalles.saldo_interes)).toFixed(2)}</label><br />
+                      <label>Saldo: $ {credito.detalles.saldo}</label><br />
                       <label>Fecha: {new Date(credito.createdAt).toLocaleDateString()}</label><br />
                       <label>Estado: {credito.estado}</label>
                     </>
