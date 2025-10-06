@@ -30,6 +30,7 @@ function Login() {
       }
       toast.success('Inicio de sesión exitoso!', { id: loadingToast, duration: 1000, position: 'bottom-center', });
     } catch (err) {
+      console.log(err)
       toast.error('Credenciales inválidas', { id: loadingToast, duration: 1000, position: 'bottom-center', });
     }
   };

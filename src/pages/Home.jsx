@@ -17,10 +17,13 @@ const API_BASE = `${import.meta.env.VITE_API_URL}`; // Cambia según tu IP
 const Home = () => {
   const navigate = useNavigate();
   const [caja, setCaja] = useState({});
+  const [dataDash, setDataDash] = useState({});
+  const [morosos, setMorosos] = useState(0);
   const theme = useTheme();
   // Usuario logueado
   const token = localStorage.getItem('token');
   const user = jwtDecode(token);
+  console.log(user)
 
   // Obtener el estado de la caja
   const obtenerCaja = async () => {
@@ -34,9 +37,43 @@ const Home = () => {
     }
   };
 
+  // Obtener el dashboard
+  const getDataDash = async()=>{
+    try {
+      const res = await axios.get(`${API_BASE}creditos/datadash?id=${user.ruta[0].id}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDataDash(res.data)
+      console.log(res.data)
+      const altoRiesgo = Number(res.data.creditos_alto_riesgo)
+      const vencidos = Number(res.data.creditos_vencidos)
+      const morosos = altoRiesgo + vencidos
+      setMorosos(morosos)
+    } catch (err) {
+      console.log(err)
+      setDataDash({
+        "total_impagos": "0",
+        "cartera": "0",
+        "creditos_alto_riesgo": "0",
+        "creditos_vencidos": "0",
+        "creditos_atrasados": "0",
+        "creditos_al_dia": "0",
+        "cartera_alto_riesgo": null,
+        "cartera_vencidos": "0",
+        "cartera_atrasados": null,
+        "cartera_al_dia": null,
+        "saldo_caja": "0",
+        "turno_id": null,
+        "recaudacion": "0",
+        "gastos": "0"
+    })
+    }
+  }
+
   useEffect(() => {
       const init = async () => {
         await obtenerCaja();
+        await getDataDash();
       };
       init();
   }, []); // Ejecutar cuando cambie la página o las filas por página
@@ -119,7 +156,7 @@ const Home = () => {
           <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
             <CreditCard></CreditCard>
             <Typography variant='subtitle2'>Créditos activos</Typography>
-            <Typography variant='h5' sx={{ color: theme.palette.green }}>56</Typography>
+            <Typography variant='h5' sx={{ color: theme.palette.green }}>{dataDash.total_impagos}</Typography>
           </Box>} 
           sx={{width:'48%', height:'100px', padding:1, borderRadius: 3, border: `1px solid ${borderColor}`}} 
           variant="contained"
@@ -129,7 +166,7 @@ const Home = () => {
           <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
             <AttachMoney></AttachMoney>
             <Typography variant='subtitle2'>Cobros pendientes</Typography>
-            <Typography variant='h5' color='warning'>$ 358.00</Typography>
+            <Typography variant='h5' color='warning'>$ {dataDash.monto_a_recaudar_hoy}</Typography>
           </Box>} 
           sx={{width:'48%', height:'100px', padding:1, borderRadius: 3, border: `1px solid ${borderColor}`}} 
           variant="contained"
@@ -141,7 +178,7 @@ const Home = () => {
           <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
             <MonetizationOn></MonetizationOn>
             <Typography variant='subtitle2'>Recaudación del día</Typography>
-            <Typography variant='h5' sx={{ color: theme.palette.green }}>$ 12000.00</Typography>
+            <Typography variant='h5' sx={{ color: theme.palette.green }}>$ {dataDash.recaudacion}</Typography>
           </Box>} 
           sx={{width:'100%', height:'100px', padding:1, borderRadius: 3, border: `1px solid ${borderColor}`}} 
           variant="contained"
@@ -153,7 +190,7 @@ const Home = () => {
           <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
             <MoneyOff></MoneyOff>
             <Typography variant='subtitle2'>Gastos del día</Typography>
-            <Typography variant='h5' sx={{ color: theme.palette.red }}>$ 124.50</Typography>
+            <Typography variant='h5' sx={{ color: theme.palette.red }}>$ {dataDash.gastos}</Typography>
           </Box>} 
           sx={{width:'100%', height:'100px', padding:1, borderRadius: 3, border: `1px solid ${borderColor}`}} 
           variant="contained"
