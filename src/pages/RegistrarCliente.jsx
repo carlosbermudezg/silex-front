@@ -148,10 +148,11 @@ const RegistrarCliente = () => {
           top: 0,
           left: 0,
           width: '100%',
+          gap: 3,
           zIndex: 999,
-          backgroundColor: isDarkMode ? theme.palette.background.paper : '#fff',
-          boxShadow: 1,
-          padding: '8px 16px',
+          backgroundColor: theme.palette.background.default,
+          borderBottom: `1px solid ${ theme.palette.border }`,
+          height: '60px',
           display: 'flex',
           alignItems: 'center',
         }}
@@ -159,24 +160,29 @@ const RegistrarCliente = () => {
         <IconButton onClick={() => navigate(-1)}>
           <ArrowBack />
         </IconButton>
+        <Typography variant='h6'>Registrar Cliente</Typography>
       </Box>
 
-      <Card sx={{ mt: 8, mb: 4 }}>
+      <Card sx={{ 
+        mb: 8,
+        backgroundColor: theme.palette.background.default
+      }}>
         <CardContent>
-          <Typography variant="h6" mb={2}>
-            Registrar Cliente
-          </Typography>
-
           <Box display="flex" flexDirection="column" gap={2}>
-            <TextField fullWidth label="Nombres" name="nombres" value={form.nombres} onChange={handleChange} />
-            <TextField fullWidth label="Teléfono" name="telefono" value={form.telefono} onChange={handleChange} />
-            <TextField fullWidth label="Dirección" name="direccion" value={form.direccion} onChange={handleChange} />
-            <TextField fullWidth label="Identificación" name="identificacion" value={form.identificacion} onChange={handleChange} />
-
+            <Typography variant='caption'>Nombres: *</Typography>
+            <TextField size='small' fullWidth label="Ingresa los nombres completos" name="nombres" value={form.nombres} onChange={handleChange} />
+            <Typography variant='caption'>Teléfono: *</Typography>
+            <TextField size='small' fullWidth label="Ingresa el número de teléfono" name="telefono" value={form.telefono} onChange={handleChange} />
+            <Typography variant='caption'>Dirección: *</Typography>
+            <TextField size='small' fullWidth label="Ingresa la dirección del domicilio" name="direccion" value={form.direccion} onChange={handleChange} />
+            <Typography variant='caption'>Identificación: *</Typography>
+            <TextField size='small' fullWidth label="Ingresa el número de identificación" name="identificacion" value={form.identificacion} onChange={handleChange} />
+            <Typography variant='caption'>Ruta: *</Typography>
             <TextField
+              size='small'
               fullWidth
               select
-              label="Ruta"
+              label="Selecciona una ruta"
               name="rutaId"
               value={form.rutaId}
               onChange={handleChange}
@@ -187,13 +193,12 @@ const RegistrarCliente = () => {
                 </MenuItem>
               ))}
             </TextField>
-
-            <Button variant="outlined" component="label">
+            <Typography variant='caption'>Fotos: *</Typography>
+            <Button variant="outlined" component="label" sx={ { backgroundColor: theme.palette.red, color: "#fff", border: `1px solid ${ theme.palette.border }` } }>
               Seleccionar Fotos
               <input hidden type="file" accept="image/*" multiple onChange={handleFileChange} />
             </Button>
             <Typography variant="caption">{form.fotos.length} fotos seleccionadas</Typography>
-
             <Box>
               <Typography variant="subtitle2" mb={1}>
                 Ubicaciones
@@ -206,7 +211,7 @@ const RegistrarCliente = () => {
               />
             </Box>
 
-            <Button variant="contained" fullWidth onClick={handleSubmit} disabled={loading}>
+            <Button sx={ { backgroundColor: 'green', color: '#fff' } } variant="contained" fullWidth onClick={handleSubmit} disabled={loading}>
               {loading ? <CircularProgress size={24} /> : 'Guardar Cliente'}
             </Button>
           </Box>

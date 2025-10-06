@@ -229,9 +229,10 @@ const InfoCredito = () => {
           left: 0,
           width: '100%',
           zIndex: 999,
-          backgroundColor: isDarkMode ? theme.palette.background.paper : '#fff',
-          boxShadow: 1,
-          padding: '8px 16px',
+          gap: 3,
+          backgroundColor: theme.palette.background.default,
+          borderBottom: `1px solid ${ theme.palette.border }`,
+          height: '60px',
           display: 'flex',
           alignItems: 'center',
         }}
@@ -239,13 +240,14 @@ const InfoCredito = () => {
         <IconButton onClick={() => navigate(-1)}>
           <ArrowBack />
         </IconButton>
+        <Typography variant='h6'>Información del crédito</Typography>
       </Box>
 
-      <Card sx={{ mt: 8 }}>
+      <Card 
+        sx={{
+          backgroundColor: theme.palette.background.primary
+        }}>
         <CardContent>
-          <Typography variant="body1" gutterBottom>
-            Información del Crédito
-          </Typography>
           <Typography variant='body2'><strong>Cliente:</strong> {credito.clienteNombre} {credito.clienteApellido}</Typography>
           <Typography variant='body2'><strong>Teléfono:</strong> {credito.detalles.cliente?.telefono}</Typography>
           <Typography variant='body2'><strong>Dirección:</strong> {credito.detalles.cliente?.direccion}</Typography>
@@ -294,8 +296,8 @@ const InfoCredito = () => {
           </FormControl>
           <Button
             variant='contained'
-            color='success'
             sx={{
+              backgroundColor: theme.palette.green,
               color: '#fff',
               marginLeft: '10px'
             }}
@@ -311,30 +313,33 @@ const InfoCredito = () => {
               </Typography>
 
               {cuotasPaginadas.map((cuota) => {
-                const color = cuota.estado === 'pagado' ? 'success' : 'warning'
+                const color = cuota.estado === 'pagado' ? theme.palette.green : theme.palette.orange
                 return(
                 <Card
                   key={cuota.id}
                   sx={{
                     mb: 1,
-                    backgroundColor: isDarkMode ? theme.palette.grey[900] : theme.palette.grey[100],
-                    color: isDarkMode ? theme.palette.grey[100] : theme.palette.text.primary,
+                    backgroundColor: theme.palette.background.secondary,
+                    color: theme.palette.text.primary,
                   }}
                 >
                   <CardContent>
                     <Typography><strong>Monto:</strong> $ {cuota.monto.toFixed(2)}</Typography>
                     <Typography><strong>Fecha:</strong> {new Date(cuota.fecha_pago).toLocaleDateString()}</Typography>
-                    <strong>Abonado: </strong><Chip color={color} size='small' label={`$ ${cuota.monto_pagado.toFixed(2)}`}></Chip>
+                    <strong>Abonado: </strong><Chip sx={{ backgroundColor: color }} size='small' label={`$ ${cuota.monto_pagado.toFixed(2)}`}></Chip>
                     <Typography><strong>Estado:</strong> {cuota.estado}</Typography>
                   </CardContent>
                 </Card>
               )})}
               <Box display="flex" justifyContent="center" mt={2}>
                 <Pagination
+                  sx={{width:'100%', borderRadius:3, display:'flex', justifyContent:'center', border: `1px solid ${ theme.palette.border }`, p:1, mt:1}}
                   count={totalPagesCuotas}
                   page={page}
                   onChange={(e, val) => setPage(val)}
-                  color="primary"
+                  color= { theme.palette.background.default }        
+                  shape='rounded'
+                  variant='outlined'
                   size="small"
                 />
               </Box>
@@ -357,7 +362,7 @@ const InfoCredito = () => {
                   key={pago.id || idx}
                   sx={{
                     mb: 1,
-                    backgroundColor: isDarkMode ? theme.palette.grey[900] : theme.palette.grey[100],
+                    backgroundColor: theme.palette.background.secondary,
                     color: isDarkMode ? theme.palette.grey[100] : theme.palette.text.primary,
                   }}
                 >
@@ -387,10 +392,13 @@ const InfoCredito = () => {
               ))}
               <Box display="flex" justifyContent="center" mt={2}>
                 <Pagination
+                  sx={{width:'100%', borderRadius:3, display:'flex', justifyContent:'center', border: `1px solid ${ theme.palette.border }`, p:1, mt:1}}
                   count={totalPagesPagos}
                   page={pagePagos}
                   onChange={(e, val) => setPagePagos(val)}
-                  color="primary"
+                  color= { theme.palette.background.default }        
+                  shape='rounded'
+                  variant='outlined'
                   size="small"
                 />
               </Box>

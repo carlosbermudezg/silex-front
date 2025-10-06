@@ -122,10 +122,11 @@ const AgregarGasto = () => {
           top: 0,
           left: 0,
           width: '100%',
+          gap: 3,
           zIndex: 999,
-          backgroundColor: isDarkMode ? theme.palette.background.paper : '#fff',
-          boxShadow: 1,
-          padding: '8px 16px',
+          backgroundColor: theme.palette.background.default,
+          borderBottom: `1px solid ${ theme.palette.border }`,
+          height: '60px',
           display: 'flex',
           alignItems: 'center',
         }}
@@ -133,36 +134,38 @@ const AgregarGasto = () => {
         <IconButton onClick={() => navigate(-1)}>
           <ArrowBack />
         </IconButton>
+        <Typography variant='h6'>Registrar nuevo gasto</Typography>
       </Box>
 
-      <Card sx={{ mt: 8, mb: 4 }}>
+      <Card sx={{ 
+        mt: 4, 
+        mb: 4,
+        backgroundColor: theme.palette.background.default 
+      }}>
         <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Registrar nuevo gasto
-          </Typography>
-
           <form onSubmit={handleSubmit}>
             <Box display="flex" flexDirection="column" gap={2}>
+              <Typography variant='caption'>Descripción: *</Typography>
               <TextField
-                label="Descripción"
+                label="Ingresa una descripción"
                 value={descripcion}
                 onChange={(e) => setDescripcion(e.target.value)}
                 fullWidth
                 size="small"
               />
-
+              <Typography variant='caption'>Monto: *</Typography>
               <TextField
-                label="Monto"
+                label="Ingresa un monto"
                 value={monto}
                 onChange={(e) => setMonto(e.target.value)}
                 type="number"
                 fullWidth
                 size="small"
               />
-
+              <Typography variant='caption'>Categoría: *</Typography>
               <TextField
                 select
-                label="Categoría"
+                label="Selecciona una categoría"
                 value={categoria}
                 onChange={(e) => setCategoria(e.target.value)}
                 fullWidth

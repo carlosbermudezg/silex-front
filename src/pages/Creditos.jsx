@@ -14,10 +14,11 @@ import {
   ListItemText,
   Chip,
 } from '@mui/material';
-import { InfoOutlined } from '@mui/icons-material';
+import { RemoveRedEyeOutlined } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import toast from 'react-hot-toast';
+import { useTheme } from '@mui/material/styles';
 
 const API_BASE = `${import.meta.env.VITE_API_URL}`;
 
@@ -26,13 +27,11 @@ const Creditos = () => {
   const [filtered, setFiltered] = useState([]);
   const [loading, setLoading] = useState(true);
   const [config, setConfig] = useState({})
-
   const [search, setSearch] = useState('');
-
   const [page, setPage] = useState(1);
   const [limit] = useState(10);
   const [totalPages, setTotalPages] = useState(1);
-
+  const theme = useTheme();
   const token = localStorage.getItem('token');
   const user = jwtDecode(token);
   const verCredito = user.permisos.includes('viewcr')
@@ -137,7 +136,7 @@ const Creditos = () => {
 
       <Box sx={{ mb: 2, display: 'flex', flexDirection: 'column', gap: 1 }}>
         <TextField
-          label="Buscar por cliente"
+          label="Buscar por nombre de cliente"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           fullWidth
@@ -153,25 +152,40 @@ const Creditos = () => {
         <List>
           {filtered.map((credito) => {
             const diasAtraso = obtenerDiasAtraso(credito.detalles.cuotas)
-            let color = 'success'
+            let color = theme.palette.green
             if (diasAtraso >= config.days_to_yellow) {
-              color = 'warning'
+              color = theme.palette.orange
             }
             if (diasAtraso >= config.days_to_red) {
-              color ='error'
+              color = theme.palette.red
             }
 
             return(
-            <Paper key={credito.id} sx={{ mb: 1, position: 'relative' }}>
+            <Paper 
+              key={credito.id} 
+              sx={{ 
+                mb: 1, 
+                position: 'relative',
+                backgroundColor: theme.palette.background.primary
+              }}
+            >
               {
                 verCredito &&
-                <IconButton
+                <Button
                   onClick={() => handleVerDetalle(credito)}
-                  sx={{ position: 'absolute', top: 2, right: 2, zIndex:1 }}
-                  color='primary'
+                  sx={{ 
+                    position: 'absolute', 
+                    top: 2, 
+                    right: 2, 
+                    gap: 1,
+                    zIndex:1,
+                    border: `1px solid ${ theme.palette.border }`,
+                    backgroundColor: theme.palette.primary.main
+                  }}
+                  color = "text"
                 >
-                  <InfoOutlined />
-                </IconButton>
+                  <RemoveRedEyeOutlined sx={{ fontSize: 18}}></RemoveRedEyeOutlined> Ver
+                </Button>
               }
               <ListItem>
                 <ListItemText
@@ -186,7 +200,7 @@ const Creditos = () => {
                 />
               </ListItem>
               <div style={{position:'absolute', right: 7, bottom: 7}}>
-                <Typography variant='caption' color='textDisabled'>Dias Atraso: <Chip label={diasAtraso} color={color} size='small' /></Typography>
+                <Typography variant='caption' color='textDisabled'>Dias Atraso: <Chip label={diasAtraso} sx={{backgroundColor: color}} size='small' /></Typography>
               </div>
             </Paper>
           )})}
@@ -203,7 +217,7 @@ const Creditos = () => {
             count={totalPages}
             page={page}
             onChange={(event, value) => setPage(value)}
-            color="primary"
+            color= { theme.palette.background.default }
           />
       </Box>
     </div>

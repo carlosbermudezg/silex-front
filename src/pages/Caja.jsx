@@ -23,6 +23,7 @@ import localeData from 'dayjs/plugin/localeData';
 dayjs.extend(weekday);
 dayjs.extend(localeData);
 dayjs.locale('es');
+import { useTheme } from '@mui/material/styles';
 
 const API_BASE = `${import.meta.env.VITE_API_URL}`;
 
@@ -35,14 +36,14 @@ const Caja = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10); 
   const [totalPages, setTotalPages] = useState(0);
 
+  const theme = useTheme()
+
   // Usuario logueado
   const token = localStorage.getItem('token');
   const user = jwtDecode(token);
 
-  const red = '#ec407a'
-  const blue = '#2196f3'
-  const purple = '#ba68c8'
-  const green = '#81c784'
+  const red = theme.palette.red
+  const green = theme.palette.green
   const gray = '#575757'
   const white = '#ffffff'
 
@@ -144,7 +145,7 @@ const Caja = () => {
       </Typography>
       <Typography variant="caption">{`${capitalizar(diaSemana)}, ${fechaCompleta}`}</Typography>
 
-      <TableContainer component={Paper} sx={{ width: '100%', borderRadius:3, padding:1}}>
+      <TableContainer component={Paper} sx={{ width: '100%', borderRadius:3, padding:1, backgroundColor: theme.palette.background.default}}>
         <Table size="small">
           <TableHead>
             <TableRow>
@@ -157,10 +158,10 @@ const Caja = () => {
               movimientos.map((mov) => {
                 let color, simbol;
                 if (mov.category === 'ingreso') {
-                  mov.tipo === 'visita' ? color = 'primary' : color = 'success'
+                  mov.tipo === 'visita' ? color = 'primary' : color = green
                   simbol = mov.monto <= 0 ? '' : '+'
                 } else {
-                  color = 'error';
+                  color = red;
                   simbol = '-';
                 }
                 return (
@@ -211,7 +212,7 @@ const Caja = () => {
         count={totalPages}
         page={page}
         onChange={(event, value) => setPage(value)}
-        color="primary"
+        color= { theme.palette.background.default }
       />
     </Box>
   );

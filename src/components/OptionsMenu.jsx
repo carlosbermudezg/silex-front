@@ -13,6 +13,7 @@ import {
     DialogActions,
   } from '@mui/material';
 import { useThemeContext } from "../context/ThemeContext";
+import { useTheme } from "@mui/material/styles";
 
 const ITEM_HEIGHT = 48;
 
@@ -21,6 +22,7 @@ export default function OptionsMenu() {
   const [openLogoutDialog, setOpenLogoutDialog] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const open = Boolean(anchorEl);
+  const theme = useTheme();
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -69,6 +71,7 @@ export default function OptionsMenu() {
             style: {
               maxHeight: ITEM_HEIGHT * 4.5,
               width: '20ch',
+              backgroundColor: theme.palette.background.default
             },
           },
           list: {
@@ -85,16 +88,25 @@ export default function OptionsMenu() {
         ))}
       </Menu>
       {/* Diálogo de confirmación para salir */}
-        <Dialog open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)}>
-            <DialogTitle>¿Cerrar sesión?</DialogTitle>
+        <Dialog open={openLogoutDialog} onClose={() => setOpenLogoutDialog(false)}
+          slotProps={{
+            paper: {
+              sx: {
+                backgroundColor: theme.palette.background.default,
+                color: 'white',   // opcional, para que el texto contraste
+              },
+            },
+          }}
+        >
+            <DialogTitle color="textPrimary">¿Cerrar sesión?</DialogTitle>
                 <DialogContent>
-                    <Typography>¿Estás seguro de que deseas cerrar sesión?</Typography>
+                    <Typography color="textPrimary">¿Estás seguro de que deseas cerrar sesión?</Typography>
                 </DialogContent>
             <DialogActions>
-                <Button onClick={() => setOpenLogoutDialog(false)} color="primary">
+                <Button variant="contained" onClick={() => setOpenLogoutDialog(false)} sx={{ borderColor: theme.palette.border , color: theme.palette.text.primary }}>
                 Cancelar
                 </Button>
-                <Button onClick={handleLogout} color="error" variant="contained">
+                <Button onClick={handleLogout} sx={{ backgroundColor: theme.palette.red, color: "#fff" }} variant="contained">
                 Cerrar
                 </Button>
             </DialogActions>

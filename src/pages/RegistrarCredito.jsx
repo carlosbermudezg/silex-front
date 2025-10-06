@@ -328,6 +328,37 @@ const RegistrarCredito = () => {
     }
   };
 
+  const selectProp = {
+    select: {
+      MenuProps: {
+        slotProps: {
+          paper: {
+            sx: {
+              backgroundColor: 'red',
+              color: 'white',
+            },
+          },
+        },
+      },
+      sx: {
+        color: 'white', // 🔹 color del texto seleccionado
+      },
+    },
+  }
+  const selectStyle = {
+    '& .MuiInputLabel-root': {
+      color: 'white', // 🔹 color del label
+    },
+    '& .MuiOutlinedInput-notchedOutline': {
+      borderColor: 'white', // 🔹 color del borde
+    },
+    '&:hover .MuiOutlinedInput-notchedOutline': {
+      borderColor: 'white',
+    },
+    '& .MuiSvgIcon-root': {
+      color: 'white', // 🔹 color del ícono del select (flecha)
+    },
+  }
   return (
     <Box p={2}>
       <Box
@@ -336,10 +367,11 @@ const RegistrarCredito = () => {
           top: 0,
           left: 0,
           width: '100%',
+          gap: 3,
           zIndex: 999,
-          backgroundColor: isDarkMode ? theme.palette.background.paper : '#fff',
-          boxShadow: 1,
-          padding: '8px 16px',
+          backgroundColor: theme.palette.background.default,
+          borderBottom: `1px solid ${ theme.palette.border }`,
+          height: '60px',
           display: 'flex',
           alignItems: 'center',
         }}
@@ -347,22 +379,26 @@ const RegistrarCredito = () => {
         <IconButton onClick={() => navigate(-1)}>
           <ArrowBack />
         </IconButton>
+        <Typography variant='h6'>Registrar crédito</Typography>
       </Box>
 
-      <Card sx={{ mt: 8, mb: 4 }}>
+      <Card sx={{ 
+        mb: 8,
+        backgroundColor: theme.palette.background.default 
+      }}>
         <CardContent>
-          <Typography variant="h6" mb={2}>
-            Registrar Crédito
-          </Typography>
-
           <Box display="flex" flexDirection="column" gap={2}>
+            <Typography variant='caption'>Ruta: *</Typography>
             <TextField
               fullWidth
               select
-              label="Ruta"
+              size='small'
+              label="Selecciona una ruta"
               name="rutaId"
               value={form.rutaId}
               onChange={handleChange}
+              slotProps={ selectProp }
+              sx={ selectStyle }
             >
               {rutas.map((ruta) => (
                 <MenuItem key={ruta.id} value={ruta.id}>
@@ -370,10 +406,11 @@ const RegistrarCredito = () => {
                 </MenuItem>
               ))}
             </TextField>
-
+            <Typography variant='caption'>Cliente: *</Typography>
             <Autocomplete
               disabled={!form.rutaId}
               options={clientes}
+              size='small'
               getOptionLabel={(option) => option.nombres || ''}
               value={clientes.find((c) => c.id === form.clienteId) || null}
               inputValue={clienteSearch}
@@ -384,18 +421,21 @@ const RegistrarCredito = () => {
                   clienteId: value ? value.id : '',
                 }))
               }
+              slotProps={ selectProp }
               filterOptions={(x) => x}
               loading={loadingClientes}
-              renderInput={(params) => <TextField {...params} label="Seleccionar Cliente" fullWidth />}
+              renderInput={(params) => <TextField {...params} label="Selecciona un cliente" fullWidth />}
             />
-
+            <Typography variant='caption'>Producto: *</Typography>
             <TextField
               fullWidth
               select
-              label="Producto"
+              size='small'
+              label="Selecciona un producto"
               name="productoId"
               value={form.productoId}
               onChange={handleChange}
+              slotProps={ selectProp }
             >
               {productos.map((producto) => (
                 <MenuItem key={producto.id} value={producto.id}>
@@ -403,10 +443,11 @@ const RegistrarCredito = () => {
                 </MenuItem>
               ))}
             </TextField>
-
+            <Typography variant='caption'>Monto: *</Typography>
             <TextField
               fullWidth
-              label="Monto"
+              size='small'
+              label="Ingresa un monto"
               name="monto"
               value={form.monto}
               onChange={handleChange}
@@ -415,12 +456,10 @@ const RegistrarCredito = () => {
               helperText={errors.monto}
               inputProps={{ min: 0, step: '0.01' }}
             />
-            {
-              <Typography variant='caption'> Total crédito: ${parseFloat(form.monto)+((parseFloat(form.monto) * config.interes)/100)}</Typography>
-            }
-
+            <Typography variant='caption'>Plazo: *</Typography>
             <TextField
               fullWidth
+              size='small'
               label="Plazo en días"
               name="plazo"
               value={form.plazo}
@@ -430,17 +469,19 @@ const RegistrarCredito = () => {
               helperText={errors.plazo}
               inputProps={{ min: 1 }}
             />
-
+            <Typography variant='caption'>Frecuencia de pago: *</Typography>
             <TextField
               fullWidth
+              size='small'
               select
-              label="Frecuencia de pago"
+              label="Elige una frecuencia de pago"
               name="frecuencia_pago"
               value={form.frecuencia_pago}
               onChange={handleChange}
               disabled={!configCreditos}
               error={Boolean(errors.frecuencia_pago)}
               helperText={errors.frecuencia_pago}
+              slotProps={ selectProp }
             >
               {(configCreditos && configCreditos.frecuencia_pago ?
                 JSON.parse('["' + configCreditos.frecuencia_pago.replace(/[{}]/g, '').replace(/,/g, '","') + '"]') : []
@@ -453,6 +494,9 @@ const RegistrarCredito = () => {
             <FormGroup>
               <FormControlLabel control={<Checkbox checked={primeraCuota} onClick={ ()=> setPrimeraCuota(!primeraCuota) } />} label="Abonar primera cuota" />
             </FormGroup>
+            {
+              <Typography variant='caption'> Total crédito: ${parseFloat(form.monto)+((parseFloat(form.monto) * config.interes)/100)}</Typography>
+            }
             {
               (form.plazo && form.frecuencia_pago) && <Typography variant='caption'> Valor de cuota: ${ valorCuota }</Typography>
             }
