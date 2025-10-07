@@ -127,7 +127,7 @@ const Caja = () => {
             <Box sx={{display:'flex', alignItems:'center', width:'100%', justifyContent:'space-between', padding:2}}>
               <IconApp route='/caja.png'></IconApp>
               <Box>
-              <Typography sx={{fontSize:'12px', fontWeight:'bold'}}>Caja <label style={{color:colorStatus}}>{caja.estado}</label></Typography>
+              <Typography sx={{fontSize:'12px', fontWeight:'bold', textTransform: 'uppercase'}}>Caja <label style={{color:colorStatus}}>{caja.estado}</label></Typography>
               <Typography sx={{fontSize:'28px'}}>$ {caja.saldoActual}</Typography>
               </Box>
               <DoubleArrow fontSize='32px' sx={{color:colorStatus}}></DoubleArrow>

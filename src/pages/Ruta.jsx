@@ -6,29 +6,22 @@ import {
   ListItemText,
   Paper,
   CircularProgress,
-  Divider,
   TextField,
   Box,
   Dialog, DialogActions, DialogContent,
   DialogTitle,
   Pagination,
-  Button, MenuItem
+  Button, MenuItem, Chip
 } from '@mui/material';
 import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import toast from 'react-hot-toast';
-
-const API_BASE = `${import.meta.env.VITE_API_URL}`;
-const estadoColor = {
-  aprobado: 'success',
-  pendiente: 'warning',
-  rechazado: 'error',
-};
+import { useTheme } from '@mui/material/styles';
 
 const Ruta = () => {
   const token = localStorage.getItem('token');
   const user = jwtDecode(token);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [puntos, setPuntos] = useState([]);
@@ -39,6 +32,7 @@ const Ruta = () => {
   const [metodoPago, setMetodoPago] = useState('');
   const [ubicacionActual, setUbicacionActual] = useState(null);
   const [puntoSeleccionado, setPuntoSeleccionado] = useState(null);
+  const theme = useTheme()
 
   const handleCloseModal = () => {
     setOpenModal(false);
@@ -122,13 +116,14 @@ const Ruta = () => {
       </Typography>
 
       {/* Búsqueda por descripción */}
-      {/* <Box sx={{ mb: 2 }}>
+      {/* <Box sx={{ mb: 1}}>
         <TextField
-          label="Buscar por descripción"
+          label="Buscar por cliente"
           value=""
           onChange={handleSearchChange}
           fullWidth
           size="small"
+          color='info'
         />
       </Box> */}
 
@@ -140,49 +135,64 @@ const Ruta = () => {
       ) : (
         <>
           <List>
-            {puntos.map((punto) => (
-              <Paper key={punto.creditoId} sx={{ mb: 1 }}>
-                <ListItem
-                  secondaryAction={
-                    <Button
-                      onClick={()=> handleOpenModal(punto)}
-                      variant='contained'
-                      color='success'
-                      sx={{
-                        color:'#fff'
-                      }}
-                    >
-                      Pagar
-                    </Button>
-                  }
+            {puntos.map((punto) => {
+              const cuotasAtraso = punto.cuotasAtrasadas
+              let color = theme.palette.green
+              if (cuotasAtraso >= 2) {
+                color = theme.palette.orange
+              }
+              if (cuotasAtraso >= 3) {
+                color = theme.palette.red
+              }
+              return(
+                <Paper 
+                  key={punto.creditoId} 
+                  sx={{ 
+                    mb: 1,
+                    backgroundColor: theme.palette.background.default
+                    }}
                 >
-                  <ListItemText
-                    secondary={
-                      <>
-                        <div>{punto.nombre}</div>
-                        <div>
-                          Fecha:{' '}
-                          {new Date(punto.fechaPago).toLocaleString('es-EC', {
-                            timeZone: 'America/Guayaquil',
-                            day: '2-digit',
-                            month: '2-digit',
-                            year: 'numeric',
-                          })}
-                        </div>
-                        <Typography color='secondary'>Monto: ${punto.cuota.toFixed(2)}</Typography>
-                        <Typography color='info'>Abonado: ${punto.monto_pagado.toFixed(2)}</Typography>
-                        <Typography color='primary'>Atrasos: {punto.cuotasAtrasadas}</Typography>
-                      </>
+                  <ListItem
+                    secondaryAction={
+                      <Button
+                        onClick={()=> handleOpenModal(punto)}
+                        variant='contained'
+                        color='success'
+                        sx={{
+                          color:'#fff'
+                        }}
+                      >
+                        Pagar
+                      </Button>
                     }
-                  />
-                </ListItem>
-                <Divider />
-              </Paper>
-            ))}
+                  >
+                    <ListItemText
+                      secondary={
+                        <>
+                          <div>{punto.nombre}</div>
+                          <div>
+                            Fecha:{' '}
+                            {new Date(punto.fechaPago).toLocaleString('es-EC', {
+                              timeZone: 'America/Guayaquil',
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                            })}
+                          </div>
+                          <Typography variant='body2' color='secondary'>Monto de la cuota: ${punto.cuota.toFixed(2)}</Typography>
+                          <Typography variant='body2' color='info'>Abonado: ${punto.monto_pagado.toFixed(2)}</Typography>
+                          <Typography variant='body2' color='text'>Cuotas atrasadas: <Chip label={punto.cuotasAtrasadas} sx={{backgroundColor: color}} size='small' /></Typography>
+                        </>
+                      }
+                    />
+                  </ListItem>
+                </Paper>
+              )
+            })}
           </List>
 
           {/* Paginación */}
-          <Box display="flex" justifyContent="center" mt={2}>
+          {/* <Box display="flex" justifyContent="center" mt={2}>
             <Pagination
               count={totalPages}
               page={page}
@@ -190,13 +200,23 @@ const Ruta = () => {
               color="primary"
               size="small"
             />
-          </Box>
+          </Box> */}
         </>
       )}
       {/* Modal para registrar el pago */}
-      <Dialog open={openModal} onClose={handleCloseModal}>
+      <Dialog open={openModal} onClose={handleCloseModal}
+        slotProps={{
+          paper: {
+            sx: {
+              backgroundColor: theme.palette.background.default,
+              color: 'white',   // opcional, para que el texto contraste,
+              width: '70%'
+            },
+          },
+        }}
+      >
         <DialogTitle>Ingresar el valor a pagar</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{display:'flex', flexDirection:'column', gap:1}}>
           <TextField
             autoFocus
             margin="dense"
@@ -206,6 +226,8 @@ const Ruta = () => {
             value={valorPagar}
             onChange={(e) => setValorPagar(e.target.value)}
             variant="outlined"
+            color='info'
+            size='small'
           />
           <TextField
               fullWidth
@@ -214,6 +236,8 @@ const Ruta = () => {
               name="metodoPago"
               value={metodoPago}
               onChange={(e)=> setMetodoPago(e.target.value)}
+              color='info'
+              size='small'
             >
                 <MenuItem key="1" value="Efectivo">
                   Efectivo
@@ -223,11 +247,11 @@ const Ruta = () => {
                 </MenuItem>
             </TextField>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseModal} color="primary">
+        <DialogActions sx={{display:'flex', paddingRight: 3}}>
+          <Button onClick={handleCloseModal} color="error" variant='outlined'>
             Cancelar
           </Button>
-          <Button disabled={ loading } onClick={handlePagar} color="primary">
+          <Button disabled={ loading } onClick={handlePagar} color="info" variant='outlined'>
             Aceptar
           </Button>
         </DialogActions>

@@ -141,6 +141,7 @@ const Creditos = () => {
           onChange={(e) => setSearch(e.target.value)}
           fullWidth
           size="small"
+          color='info'
         />
       </Box>
 
