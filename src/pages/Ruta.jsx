@@ -28,6 +28,7 @@ const estadoColor = {
 const Ruta = () => {
   const token = localStorage.getItem('token');
   const user = jwtDecode(token);
+  const [loading, setLoading] = useState(false)
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [puntos, setPuntos] = useState([]);
@@ -51,15 +52,13 @@ const Ruta = () => {
   };
 
   const handlePagar = async() => {
-    
+    setLoading(true)
     const pago = {
       creditoId : puntoSeleccionado.creditoId,
       valor : Number(valorPagar),
       metodoPago: metodoPago,
       location: `${ubicacionActual.lat}`+','+`${ubicacionActual.lng}`
     }
-
-    console.log(pago)
 
     const response = await axios.post(`${import.meta.env.VITE_API_URL}creditos/pagar`, pago, {
       headers: {
@@ -74,6 +73,7 @@ const Ruta = () => {
       console.log(error)
     })
 
+    setLoading(false)
     // Cerrar el modal después de registrar el pago
     handleCloseModal();
   };
@@ -227,7 +227,7 @@ const Ruta = () => {
           <Button onClick={handleCloseModal} color="primary">
             Cancelar
           </Button>
-          <Button onClick={handlePagar} color="primary">
+          <Button disabled={ loading } onClick={handlePagar} color="primary">
             Aceptar
           </Button>
         </DialogActions>

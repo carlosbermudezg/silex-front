@@ -87,6 +87,7 @@ function calcularDiasAtraso(fechaPago) {
 }
 
 const RutaMap = ({ render, setRender, puntos }) => {
+  const [loading, setLoading] = useState(false)
   const [rutaOrdenada, setRutaOrdenada] = useState([]);
   const [renderMap, setRenderMap] = useState(false)
   const [rutaOrdenadaConColor, setRutaOrdenadaConColor] = useState([]);
@@ -160,7 +161,7 @@ const RutaMap = ({ render, setRender, puntos }) => {
   };
 
   const handlePagar = async() => {
-    
+    setLoading(true)
     const pago = {
       creditoId : puntoSeleccionado.creditoId,
       valor : Number(valorPagar),
@@ -168,23 +169,20 @@ const RutaMap = ({ render, setRender, puntos }) => {
       location: `${ubicacionActual.lat}`+','+`${ubicacionActual.lng}`
     }
 
-    const response = 
-    await axios.post(`${import.meta.env.VITE_API_URL}creditos/pagar`, pago, {
+    const response = await axios.post(`${import.meta.env.VITE_API_URL}creditos/pagar`, pago, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     }).then((response)=> {
       toast.success('Se ha registrado el pago con éxito', {position:'bottom-center'})
       setRender(!render)
-      setTimeout(()=>{
-        setRenderMap(!renderMap)
-      },1500)
     })
     .catch((error) => {
       toast.error(error.response.data.error, {position:'bottom-center'})
       console.log(error)
     })
 
+    setLoading(false)
     // Cerrar el modal después de registrar el pago
     handleCloseModal();
   };
@@ -356,7 +354,7 @@ const RutaMap = ({ render, setRender, puntos }) => {
           <Button onClick={handleCloseModal} color="primary">
             Cancelar
           </Button>
-          <Button onClick={handlePagar} color="primary">
+          <Button disabled={loading} onClick={handlePagar} color="primary">
             Aceptar
           </Button>
         </DialogActions>

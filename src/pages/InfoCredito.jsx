@@ -48,6 +48,7 @@ const InfoCredito = () => {
   console.log(credito)
 
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(false)
   const [selectedImage, setSelectedImage] = useState(null);
   const [page, setPage] = useState(1);
   const [pagePagos, setPagePagos] = useState(1);
@@ -120,16 +121,15 @@ const InfoCredito = () => {
   };
 
   const handlePagar = async() => {
-    
+    setLoading(true)
     const pago = {
-      creditoId : puntoSeleccionado.id,
+      creditoId : puntoSeleccionado.creditoId,
       valor : Number(valorPagar),
       metodoPago: metodoPago,
       location: `${ubicacionActual.lat}`+','+`${ubicacionActual.lng}`
     }
 
-    const response = 
-    await axios.post(`${import.meta.env.VITE_API_URL}creditos/pagar`, pago, {
+    const response = await axios.post(`${import.meta.env.VITE_API_URL}creditos/pagar`, pago, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -142,6 +142,7 @@ const InfoCredito = () => {
       console.log(error)
     })
 
+    setLoading(false)
     // Cerrar el modal después de registrar el pago
     handleCloseModal();
   };
@@ -559,7 +560,7 @@ const InfoCredito = () => {
           <Button onClick={handleCloseModal} color="primary">
             Cancelar
           </Button>
-          <Button onClick={handlePagar} color="primary">
+          <Button disabled={loading} onClick={handlePagar} color="primary">
             Aceptar
           </Button>
         </DialogActions>

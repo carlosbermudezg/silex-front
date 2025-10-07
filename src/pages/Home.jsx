@@ -61,6 +61,7 @@ const Home = () => {
         "cartera_alto_riesgo": null,
         "cartera_vencidos": "0",
         "cartera_atrasados": null,
+        "monto_a_recaudar_hoy": "0",
         "cartera_al_dia": null,
         "saldo_caja": "0",
         "turno_id": null,
