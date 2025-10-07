@@ -123,7 +123,7 @@ const InfoCredito = () => {
   const handlePagar = async() => {
     setLoading(true)
     const pago = {
-      creditoId : puntoSeleccionado.creditoId,
+      creditoId : puntoSeleccionado.id,
       valor : Number(valorPagar),
       metodoPago: metodoPago,
       location: `${ubicacionActual.lat}`+','+`${ubicacionActual.lng}`
