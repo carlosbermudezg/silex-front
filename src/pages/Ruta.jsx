@@ -210,7 +210,7 @@ const Ruta = () => {
             sx: {
               backgroundColor: theme.palette.background.default,
               color: 'white',   // opcional, para que el texto contraste,
-              width: '70%'
+              width: '90%'
             },
           },
         }}
