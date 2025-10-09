@@ -2,14 +2,17 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Box, Button, Paper, TextField, Typography } from '@mui/material';
+import { Box, Button, Paper, TextField, Typography, Divider, Link } from '@mui/material';
+import { MailOutline, LockOutline, Google, Facebook, Face } from '@mui/icons-material';
 import toast from 'react-hot-toast';
 import Logo from '../components/Logo'
+import { useTheme } from '@mui/material/styles';
 
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
+  const theme = useTheme();
 
   const handleLogin = async () => {
     if(email == '' || password == '') {
@@ -30,7 +33,6 @@ function Login() {
       }
       toast.success('Inicio de sesión exitoso!', { id: loadingToast, duration: 1000, position: 'bottom-center', });
     } catch (err) {
-      console.log(err)
       toast.error('Credenciales inválidas', { id: loadingToast, duration: 1000, position: 'bottom-center', });
     }
   };
@@ -43,7 +45,7 @@ function Login() {
       alignItems: 'center',
       height: '100dvh',
       overflow: 'hidden',
-      backgroundColor: '#1a1a1aff',
+      backgroundColor: theme.palette.background.default,
       boxSizing: 'border-box',
       padding: 2,
     }}
@@ -51,48 +53,123 @@ function Login() {
       <Paper elevation={3}
         sx={{
           width: '100%',
-          maxWidth: 380,
           padding: 4,
           borderRadius: 2,
           boxShadow: 3,
-          overflow: 'hidden',
-          backgroundColor: 'background.paper',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: 1,
+          backgroundColor: theme.palette.background.default,
         }}
       >
-        <Logo></Logo>
-        <Typography variant="body1" component="h2" align="center" gutterBottom>
-          Iniciar sesión
-        </Typography>
-
-        <TextField
-          size='small'
-          label="Usuario"
-          type="email"
-          fullWidth
-          margin="normal"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-
-        <TextField
-          size='small'
-          label="Contraseña"
-          type="password"
-          fullWidth
-          margin="normal"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <Logo></Logo>
+          <Typography variant="caption" align="center">
+            Ingresa tus datos para iniciar sesión.
+          </Typography>
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+          }}
+        >
+          <Typography variant='caption'>Usuario</Typography>
+          <Box sx={{ width:'100%', display:'flex', border: `1px solid ${theme.palette.textField.superior}`, borderRadius: 2, overflow: 'hidden' }}>
+          <Box sx={{ display:'flex', padding: 1, backgroundColor: theme.palette.textField.main, justifyContent:'center', alignItems:'center'}}>
+            <MailOutline></MailOutline>
+          </Box>
+            <TextField
+              size='small'
+              type="email"
+              sx={{
+                '& .MuiInputBase-input': {
+                  caretColor: theme.palette.textField.cursor, // color del cursor
+                  backgroundColor: theme.palette.textField.main
+                },
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: theme.palette.textField.border, // color normal
+                  },
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.textField.border,
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: theme.palette.textField.border,
+                  },
+                },
+              }}
+              placeholder='Ingresa tu usuario'
+              fullWidth
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Box>
+        </Box>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'flex-start',
+          }}
+        >
+          <Typography variant='caption'>Contraseña</Typography>
+          <Box sx={{ width:'100%', display:'flex', border: `1px solid ${theme.palette.textField.superior}`, borderRadius: 2, overflow: 'hidden' }}>
+          <Box sx={{ display:'flex', padding: 1, backgroundColor: theme.palette.textField.main, justifyContent:'center', alignItems:'center'}}>
+            <LockOutline></LockOutline>
+          </Box>
+          <TextField
+            size='small'
+            type="password"
+            sx={{
+              '& .MuiInputBase-input': {
+                caretColor: theme.palette.textField.cursor, // color del cursor
+                backgroundColor: theme.palette.textField.main
+              },
+              '& .MuiOutlinedInput-root': {
+                '& fieldset': {
+                  borderColor: theme.palette.textField.border, // color normal
+                },
+                '&:hover fieldset': {
+                  borderColor: theme.palette.textField.border,
+                },
+                '&.Mui-focused fieldset': {
+                  borderColor: theme.palette.textField.border,
+                },
+              },
+            }}
+            placeholder='Ingresa tu contraseña'
+            fullWidth
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+          </Box>
+        </Box>
         <Button
           variant="contained"
-          color="primary"
           fullWidth
-          sx={{ mt: 2 }}
+          sx={{
+            mt: 2,
+            p:1,
+            borderRadius: 2,
+            backgroundColor: theme.palette.button.main,
+            color: theme.palette.button.text
+          }}
           onClick={handleLogin}
         >
-          Entrar
+          Iniciar Sesión
         </Button>
+        <Link align='center' mt={3} color={ theme.palette.text.link } href="#">Olvidé mi contraseña</Link>
       </Paper>
     </Box>
   );

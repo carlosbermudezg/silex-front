@@ -39,6 +39,7 @@ export function ThemeProvider({ children }) {
               text: {
                 primary: "#1a1a1a",
                 secondary: "#555555",
+                link: "#555555"
               },
               primary: {
                 main: "#fff",
@@ -51,6 +52,17 @@ export function ThemeProvider({ children }) {
                 light: '#f8fafc',
                 dark: '#1e293b99',
                 contrastText: '#fff',
+              },
+              button: {
+                main: "#007bff",
+                secondary: "#e2e8f0",
+                text: "#e2e8f0"
+              },
+              textField: {
+                main: '#e2e8f0',
+                border: '#e2e8f0',
+                cursor: '#1e293b',
+                superior: '#e2e8f0'
               },
               border : "#e2e8f0",
               red: "#ec407b",
@@ -68,6 +80,7 @@ export function ThemeProvider({ children }) {
               text: {
                 primary: "#ffffff",
                 secondary: "#b3b3b3",
+                link : "#007bff"
               },
               primary: {
                 main: "#0f172a",
@@ -80,6 +93,16 @@ export function ThemeProvider({ children }) {
                 light: '#f8fafc',
                 dark: '#1e293b99',
                 contrastText: '#fff',
+              },
+              button: {
+                main: "#007bff",
+                secondary: "#101922"
+              },
+              textField: {
+                main: '#1e293b',
+                border: '#1e293b',
+                cursor: '#e2e8f0',
+                superior: '#e2e8f0'
               },
               border : "#1e293b",
               red: "#ec407a",
