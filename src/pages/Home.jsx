@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import {
   Button,
   Typography,
-  Box
+  Box,
+  Divider
 } from '@mui/material';
 import { AttachMoney, CreditCard, DoubleArrow, MonetizationOn, MoneyOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
@@ -23,7 +24,6 @@ const Home = () => {
   // Usuario logueado
   const token = localStorage.getItem('token');
   const user = jwtDecode(token);
-  console.log(user)
 
   // Obtener el estado de la caja
   const obtenerCaja = async () => {
@@ -44,7 +44,6 @@ const Home = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDataDash(res.data)
-      console.log(res.data)
       const altoRiesgo = Number(res.data.creditos_alto_riesgo)
       const vencidos = Number(res.data.creditos_vencidos)
       const morosos = altoRiesgo + vencidos
@@ -176,11 +175,25 @@ const Home = () => {
       <Box sx={{width:'100%', display:'flex', gap: 1, flexWrap:'wrap', justifyContent:'center'}}>
         <Button
           children={
-          <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
-            <MonetizationOn></MonetizationOn>
-            <Typography variant='subtitle2'>Recaudación del día</Typography>
-            <Typography variant='h5' sx={{ color: theme.palette.green }}>$ {dataDash.recaudacion}</Typography>
-          </Box>} 
+          <Box sx={{ display:'flex', justifyContent:'space-around', gap:2 }}>
+            <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
+              <Typography variant='caption'>Al día</Typography>
+              <Typography variant='h5' sx={{ color: theme.palette.green }}>{dataDash.creditos_al_dia}</Typography>
+            </Box>
+            <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
+              <Typography variant='caption'>Atrasados</Typography>
+              <Typography variant='h5' sx={{ color: theme.palette.info.main }}>{dataDash.creditos_atrasados}</Typography>
+            </Box>
+            <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
+              <Typography variant='caption'>Alto riesgo</Typography>
+              <Typography variant='h5' sx={{ color: theme.palette.orange }}>{dataDash.creditos_alto_riesgo}</Typography>
+            </Box>
+            <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
+              <Typography variant='caption'>Vencidos</Typography>
+              <Typography variant='h5' sx={{ color: theme.palette.red }}>{dataDash.creditos_vencidos}</Typography>
+            </Box>
+          </Box>
+          } 
           sx={{width:'100%', height:'100px', padding:1, borderRadius: 3, border: `1px solid ${borderColor}`}} 
           variant="contained"
         />
@@ -188,11 +201,19 @@ const Home = () => {
       <Box sx={{width:'100%', display:'flex', gap: 1, flexWrap:'wrap', justifyContent:'center'}}>
         <Button
           children={
-          <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
-            <MoneyOff></MoneyOff>
-            <Typography variant='subtitle2'>Gastos del día</Typography>
-            <Typography variant='h5' sx={{ color: theme.palette.red }}>$ {dataDash.gastos}</Typography>
-          </Box>} 
+            <Box sx={{ display:'flex', width:'100%', justifyContent:'space-around' }}>  
+              <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
+                <MonetizationOn></MonetizationOn>
+                <Typography variant='subtitle2'>Recaudación del día</Typography>
+                <Typography variant='h5' sx={{ color: theme.palette.green }}>$ {dataDash.recaudacion}</Typography>
+              </Box>
+              <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
+                <MoneyOff></MoneyOff>
+                <Typography variant='subtitle2'>Gastos del día</Typography>
+                <Typography variant='h5' sx={{ color: theme.palette.red }}>$ {dataDash.gastos}</Typography>
+              </Box>
+            </Box>
+          } 
           sx={{width:'100%', height:'100px', padding:1, borderRadius: 3, border: `1px solid ${borderColor}`}} 
           variant="contained"
         />

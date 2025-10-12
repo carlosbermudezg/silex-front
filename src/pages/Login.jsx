@@ -169,7 +169,7 @@ function Login() {
         >
           Iniciar Sesión
         </Button>
-        <Link align='center' mt={3} color={ theme.palette.text.link } href="#">Olvidé mi contraseña</Link>
+        {/* <Link align='center' mt={3} color={ theme.palette.text.link } href="#">Olvidé mi contraseña</Link> */}
       </Paper>
     </Box>
   );
