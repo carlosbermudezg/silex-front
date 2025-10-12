@@ -175,7 +175,7 @@ const Home = () => {
       <Box sx={{width:'100%', display:'flex', gap: 1, flexWrap:'wrap', justifyContent:'center'}}>
         <Button
           children={
-          <Box sx={{ display:'flex', justifyContent:'space-around', gap:2 }}>
+          <Box sx={{ display:'flex', justifyContent:'space-around', gap:2, alignItems:'center'}}>
             <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
               <Typography variant='caption'>Al día</Typography>
               <Typography variant='h5' sx={{ color: theme.palette.green }}>{dataDash.creditos_al_dia}</Typography>
@@ -201,7 +201,7 @@ const Home = () => {
       <Box sx={{width:'100%', display:'flex', gap: 1, flexWrap:'wrap', justifyContent:'center'}}>
         <Button
           children={
-            <Box sx={{ display:'flex', width:'100%', justifyContent:'space-around' }}>  
+            <Box sx={{ display:'flex', width:'100%', justifyContent:'space-around', alignItems:'center'}}>  
               <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
                 <MonetizationOn></MonetizationOn>
                 <Typography variant='subtitle2'>Recaudación del día</Typography>
