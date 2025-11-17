@@ -149,6 +149,7 @@ const AgregarGasto = () => {
               <TextField
                 label="Ingresa una descripción"
                 value={descripcion}
+                color='info'
                 onChange={(e) => setDescripcion(e.target.value)}
                 fullWidth
                 size="small"
@@ -157,6 +158,7 @@ const AgregarGasto = () => {
               <TextField
                 label="Ingresa un monto"
                 value={monto}
+                color='info'
                 onChange={(e) => setMonto(e.target.value)}
                 type="number"
                 fullWidth
@@ -165,6 +167,7 @@ const AgregarGasto = () => {
               <Typography variant='caption'>Categoría: *</Typography>
               <TextField
                 select
+                color='info'
                 label="Selecciona una categoría"
                 value={categoria}
                 onChange={(e) => setCategoria(e.target.value)}
@@ -182,7 +185,7 @@ const AgregarGasto = () => {
                 )}
               </TextField>
 
-              <Button variant="outlined" component="label" size="small">
+              <Button variant="outlined" color='info' component="label" size="small">
                 Subir factura
                 <input
                   type="file"
@@ -201,7 +204,7 @@ const AgregarGasto = () => {
                 />
               )}
 
-              <Button variant="contained" size="small" type="submit" disabled={loading}>
+              <Button variant="contained" color='button' size="small" type="submit" disabled={loading}>
                 {loading ? <CircularProgress size={24} /> : 'Guardar gasto'}
               </Button>
             </Box>

@@ -19,9 +19,9 @@ const BottomNav = () => {
 
   const navItems = [
     { label: 'Inicio', icon: <HomeFilled />, path: '/home' },
-    // { label: 'Clientes', icon: <PeopleAltOutlined />, path: '/clientes' },
+    { label: 'Clientes', icon: <PeopleAltOutlined />, path: '/clientes' },
     { label: 'Créditos', icon: <CreditCard />, path: '/creditos' },
-    { label: 'Gastos', icon: <MoneyOffIcon />, path: '/gastos' },
+    // { label: 'Gastos', icon: <MoneyOffIcon />, path: '/gastos' },
     { label: 'Caja', icon: <AccountBalanceWalletIcon />, path: '/caja' },
   ];
 

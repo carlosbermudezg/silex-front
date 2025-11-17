@@ -116,7 +116,7 @@ export function ThemeProvider({ children }) {
         h2: { fontWeight: 600 },
         button: { textTransform: "none", fontWeight: 500 }
       }
-    }), [mode]);
+  }), [mode]);
 
   return (
     <ThemeContext.Provider value={{ mode, toggleTheme }}>

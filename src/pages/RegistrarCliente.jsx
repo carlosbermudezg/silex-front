@@ -34,7 +34,6 @@ const RegistrarCliente = () => {
   });
 
   const theme = useTheme();
-  const isDarkMode = theme.palette.mode === 'dark';
 
   const [rutas, setRutas] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -170,19 +169,20 @@ const RegistrarCliente = () => {
         <CardContent>
           <Box display="flex" flexDirection="column" gap={2}>
             <Typography variant='caption'>Nombres: *</Typography>
-            <TextField size='small' fullWidth label="Ingresa los nombres completos" name="nombres" value={form.nombres} onChange={handleChange} />
+            <TextField size='small' color='info' fullWidth label="Ingresa los nombres completos" name="nombres" value={form.nombres} onChange={handleChange} />
             <Typography variant='caption'>Teléfono: *</Typography>
-            <TextField size='small' fullWidth label="Ingresa el número de teléfono" name="telefono" value={form.telefono} onChange={handleChange} />
+            <TextField size='small' color='info' fullWidth label="Ingresa el número de teléfono" name="telefono" value={form.telefono} onChange={handleChange} />
             <Typography variant='caption'>Dirección: *</Typography>
-            <TextField size='small' fullWidth label="Ingresa la dirección del domicilio" name="direccion" value={form.direccion} onChange={handleChange} />
+            <TextField size='small' color='info' fullWidth label="Ingresa la dirección del domicilio" name="direccion" value={form.direccion} onChange={handleChange} />
             <Typography variant='caption'>Identificación: *</Typography>
-            <TextField size='small' fullWidth label="Ingresa el número de identificación" name="identificacion" value={form.identificacion} onChange={handleChange} />
+            <TextField size='small' color='info' fullWidth label="Ingresa el número de identificación" name="identificacion" value={form.identificacion} onChange={handleChange} />
             <Typography variant='caption'>Ruta: *</Typography>
             <TextField
               size='small'
               fullWidth
               select
               label="Selecciona una ruta"
+              color='info'
               name="rutaId"
               value={form.rutaId}
               onChange={handleChange}
@@ -211,7 +211,7 @@ const RegistrarCliente = () => {
               />
             </Box>
 
-            <Button sx={ { backgroundColor: 'green', color: '#fff' } } variant="contained" fullWidth onClick={handleSubmit} disabled={loading}>
+            <Button color='button' sx={ { color: '#fff' } } variant="contained" fullWidth onClick={handleSubmit} disabled={loading}>
               {loading ? <CircularProgress size={24} /> : 'Guardar Cliente'}
             </Button>
           </Box>

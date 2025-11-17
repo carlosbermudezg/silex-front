@@ -17,25 +17,11 @@ const API_BASE = `${import.meta.env.VITE_API_URL}`; // Cambia según tu IP
 
 const Home = () => {
   const navigate = useNavigate();
-  const [caja, setCaja] = useState({});
   const [dataDash, setDataDash] = useState({});
-  const [morosos, setMorosos] = useState(0);
   const theme = useTheme();
   // Usuario logueado
   const token = localStorage.getItem('token');
   const user = jwtDecode(token);
-
-  // Obtener el estado de la caja
-  const obtenerCaja = async () => {
-    try {
-      const response = await axios.get(`${API_BASE}caja/user/${user.userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setCaja(response.data);
-    } catch (err) {
-      console.error(err);
-    }
-  };
 
   // Obtener el dashboard
   const getDataDash = async()=>{
@@ -44,82 +30,85 @@ const Home = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDataDash(res.data)
-      const altoRiesgo = Number(res.data.creditos_alto_riesgo)
-      const vencidos = Number(res.data.creditos_vencidos)
-      const morosos = altoRiesgo + vencidos
-      setMorosos(morosos)
     } catch (err) {
-      console.log(err)
       setDataDash({
-        "total_impagos": "0",
-        "cartera": "0",
-        "creditos_alto_riesgo": "0",
-        "creditos_vencidos": "0",
-        "creditos_atrasados": "0",
-        "creditos_al_dia": "0",
-        "cartera_alto_riesgo": null,
-        "cartera_vencidos": "0",
-        "cartera_atrasados": null,
-        "monto_a_recaudar_hoy": "0",
-        "cartera_al_dia": null,
-        "saldo_caja": "0",
-        "turno_id": null,
-        "recaudacion": "0",
-        "gastos": "0"
+        "creditos_activos": 0,
+        "creditos_al_dia": 0,
+        "creditos_atrasados": 0,
+        "creditos_alto_riesgo": 0,
+        "creditos_vencidos": 0,
+        "cartera_total": 0,
+        "saldo_caja": 0,
+        "estado_caja": "cerrada",
+        "recaudacion_hoy": 0,
+        "gastos_hoy": 0,
+        "cobros_pendientes": 0
     })
     }
   }
 
   useEffect(() => {
       const init = async () => {
-        await obtenerCaja();
         await getDataDash();
       };
       init();
-  }, []); // Ejecutar cuando cambie la página o las filas por página
+  }, []);
 
   const red = theme.palette.red
   const green = theme.palette.green
   const borderColor = theme.palette.border
 
-  const colorStatus = caja.estado == 'abierta' ? green : red
+  const colorStatus = dataDash.estado_caja == 'abierta' ? green : red
 
   const actions = [
     {
       name: 'Añadir Cliente',
       icon: '/cliente.png',
       title : 'Registra un nuevo cliente',
-      link: '/registrar-cliente'
+      link: '/registrar-cliente',
+      disabled: false
     },
     {
       name: 'Nuevo Crédito',
       icon: '/credito.png',
       title : 'Otorga un nuevo crédito',
-      link: '/registrar-credito'
+      link: '/registrar-credito',
+      disabled: false
     },
     {
-      name: 'Nuevo Gasto',
+      name: 'Gastos',
       icon: '/gastos.png',
-      title : 'Agrega un nuevo gasto',
-      link: '/registro-gasto'
+      title : 'Revisa y agrega gastos',
+      link: '/gastos',
+      disabled: false
     },
     {
       name: 'Comprobantes',
       icon: '/comprobante.png',
       title : 'Ver los últimos pagos',
-      link: '/pagos'
+      link: '/pagos',
+      disabled: false
     },
     {
       name: 'Ruta de Cobro',
       icon: '/lista.png',
       title : 'Ruta de cobros del día',
-      link: '/ruta'
+      link: '/ruta',
+      disabled: false
     },
+    // {
+    //   name: 'Ruta',
+    //   icon: '/ruta3.png',
+    //   title : 'Ruta de cobros del día',
+    //   link: '/rutamapa',
+    //   disabled: false
+    // },
     {
-      name: 'Ruta',
-      icon: '/ruta3.png',
-      title : 'Ruta de cobros del día',
-      link: '/rutamapa'
+      name: 'Reportes',
+      icon: '/reportes.png',
+      title : 'Reportes Generales',
+      link: '/rutamapa',
+      disabled: true
     }
   ]
 
@@ -138,8 +127,8 @@ const Home = () => {
             <Box sx={{display:'flex', alignItems:'center', width:'100%', justifyContent:'space-between', padding:2}}>
               <IconApp route='/caja.png'></IconApp>
               <Box>
-              <Typography sx={{fontSize:'12px', fontWeight:'bold', textTransform:'uppercase'}}>Caja <label style={{color:colorStatus}}>{caja.estado}</label></Typography>
-              <Typography sx={{fontSize:'28px'}}>$ {caja.saldoActual}</Typography>
+              <Typography sx={{fontSize:'12px', fontWeight:'bold', textTransform:'uppercase'}}>Caja <label style={{color:colorStatus}}>{dataDash.estado_caja}</label></Typography>
+              <Typography sx={{fontSize:'28px'}}>$ {dataDash.saldo_caja}</Typography>
               </Box>
               <DoubleArrow fontSize='32px' sx={{color:colorStatus}}></DoubleArrow>
             </Box>
@@ -156,7 +145,7 @@ const Home = () => {
           <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
             <CreditCard></CreditCard>
             <Typography variant='subtitle2'>Créditos activos</Typography>
-            <Typography variant='h5' sx={{ color: theme.palette.green }}>{dataDash.total_impagos}</Typography>
+            <Typography variant='h5' sx={{ color: theme.palette.green }}>{dataDash.creditos_activos}</Typography>
           </Box>} 
           sx={{width:'48%', height:'100px', padding:1, borderRadius: 3, border: `1px solid ${borderColor}`}} 
           variant="contained"
@@ -166,7 +155,7 @@ const Home = () => {
           <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
             <AttachMoney></AttachMoney>
             <Typography variant='subtitle2'>Cobros pendientes</Typography>
-            <Typography variant='h5' color='warning'>$ {dataDash.monto_a_recaudar_hoy}</Typography>
+            <Typography variant='h5' color='warning'>$ {dataDash.cobros_pendientes}</Typography>
           </Box>} 
           sx={{width:'48%', height:'100px', padding:1, borderRadius: 3, border: `1px solid ${borderColor}`}} 
           variant="contained"
@@ -175,7 +164,7 @@ const Home = () => {
       <Box sx={{width:'100%', display:'flex', gap: 1, flexWrap:'wrap', justifyContent:'center'}}>
         <Button
           children={
-          <Box sx={{ display:'flex', justifyContent:'space-around', gap:2, alignItems:'center'}}>
+          <Box sx={{ display:'flex', justifyContent:'space-around', gap:1, alignItems:'center', width:'100%'}}>
             <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
               <Typography variant='caption'>Al día</Typography>
               <Typography variant='h5' sx={{ color: theme.palette.green }}>{dataDash.creditos_al_dia}</Typography>
@@ -205,12 +194,12 @@ const Home = () => {
               <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
                 <MonetizationOn></MonetizationOn>
                 <Typography variant='subtitle2'>Recaudación del día</Typography>
-                <Typography variant='h5' sx={{ color: theme.palette.green }}>$ {dataDash.recaudacion}</Typography>
+                <Typography variant='h5' sx={{ color: theme.palette.green }}>$ {dataDash.recaudacion_hoy}</Typography>
               </Box>
               <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>
                 <MoneyOff></MoneyOff>
                 <Typography variant='subtitle2'>Gastos del día</Typography>
-                <Typography variant='h5' sx={{ color: theme.palette.red }}>$ {dataDash.gastos}</Typography>
+                <Typography variant='h5' sx={{ color: theme.palette.red }}>$ {dataDash.gastos_hoy}</Typography>
               </Box>
             </Box>
           } 
@@ -224,6 +213,7 @@ const Home = () => {
             actions.map((element, index)=>{
               return(
                 <Button
+                disabled={element.disabled}
                   key={index}
                   children={
                   <Box sx={{display:'flex', flexDirection:'column', alignItems:'center'}}>

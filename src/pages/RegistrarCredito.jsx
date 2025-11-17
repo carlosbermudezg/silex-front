@@ -334,7 +334,7 @@ const RegistrarCredito = () => {
         slotProps: {
           paper: {
             sx: {
-              backgroundColor: 'red',
+              backgroundColor: theme.palette.textField.main,
               color: 'white',
             },
           },
@@ -395,6 +395,7 @@ const RegistrarCredito = () => {
               size='small'
               label="Selecciona una ruta"
               name="rutaId"
+              color='info'
               value={form.rutaId}
               onChange={handleChange}
               slotProps={ selectProp }
@@ -421,7 +422,6 @@ const RegistrarCredito = () => {
                   clienteId: value ? value.id : '',
                 }))
               }
-              slotProps={ selectProp }
               filterOptions={(x) => x}
               loading={loadingClientes}
               renderInput={(params) => <TextField {...params} label="Selecciona un cliente" fullWidth />}
@@ -431,6 +431,7 @@ const RegistrarCredito = () => {
               fullWidth
               select
               size='small'
+              color='info'
               label="Selecciona un producto"
               name="productoId"
               value={form.productoId}
@@ -447,6 +448,7 @@ const RegistrarCredito = () => {
             <TextField
               fullWidth
               size='small'
+              color='info'
               label="Ingresa un monto"
               name="monto"
               value={form.monto}
@@ -462,6 +464,7 @@ const RegistrarCredito = () => {
               size='small'
               label="Plazo en días"
               name="plazo"
+              color='info'
               value={form.plazo}
               onChange={handleChange}
               type="number"
@@ -474,6 +477,7 @@ const RegistrarCredito = () => {
               fullWidth
               size='small'
               select
+              color='info'
               label="Elige una frecuencia de pago"
               name="frecuencia_pago"
               value={form.frecuencia_pago}
@@ -492,7 +496,7 @@ const RegistrarCredito = () => {
               ))}
             </TextField>
             <FormGroup>
-              <FormControlLabel control={<Checkbox checked={primeraCuota} onClick={ ()=> setPrimeraCuota(!primeraCuota) } />} label="Abonar primera cuota" />
+              <FormControlLabel control={<Checkbox color='info' checked={primeraCuota} onClick={ ()=> setPrimeraCuota(!primeraCuota) } />} label="Abonar primera cuota" />
             </FormGroup>
             {
               <Typography variant='caption'> Total crédito: ${parseFloat(form.monto)+((parseFloat(form.monto) * config.interes)/100)}</Typography>
@@ -504,7 +508,7 @@ const RegistrarCredito = () => {
               <Typography variant='caption'> Valor a entregar: ${ valorEntregar }</Typography>
             }
 
-            <Button variant="contained" fullWidth onClick={handleSubmit} disabled={loading}>
+            <Button variant="contained" fullWidth color='button' onClick={handleSubmit} disabled={loading}>
               {loading ? <CircularProgress size={24} /> : 'Guardar Crédito'}
             </Button>
           </Box>

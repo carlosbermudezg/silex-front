@@ -11,6 +11,7 @@ import {
   Box,
   Chip,
   Pagination,
+  Button,
 } from '@mui/material';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -64,15 +65,19 @@ const Gastos = () => {
   };
 
   return (
-    <div style={{ padding: 20, paddingBottom: 70 }}>
-      <Typography variant="h5" gutterBottom>
-        Gastos del día
-      </Typography>
+    <div style={{ display:'flex', flexDirection:'column', padding: 20, paddingBottom: 70, gap:20 }}>
+      <Box sx={{ display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+        <Typography variant="h5" gutterBottom>
+          Gastos del día
+        </Typography>
+        <Button color='button' size='small' variant='contained' onClick={()=> navigate('/registro-gasto')}>Nuevo Gasto</Button>
+      </Box>
 
       {/* Búsqueda por descripción */}
       <Box sx={{ mb: 2 }}>
         <TextField
           label="Buscar por descripción"
+          color='info'
           value={descripcionFilter}
           onChange={handleSearchChange}
           fullWidth
