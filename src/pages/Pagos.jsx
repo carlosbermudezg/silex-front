@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
 import { useTheme } from '@mui/material/styles';
 import {
@@ -22,8 +21,6 @@ import toast from 'react-hot-toast';
 const API_BASE = `${import.meta.env.VITE_API_URL}`;
 
 const Pagos = () => {
-    const { state } = useLocation();
-    console.log(state)
     const [abonos, setAbonos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
@@ -31,6 +28,7 @@ const Pagos = () => {
     const theme =useTheme();
     const token = localStorage.getItem('token');
     const user = jwtDecode(token);
+    const turnoId = localStorage.getItem('turno');
 
     // Obtener el comprobante de pago en pdf
     const downloadComprobante = async (id) => {
@@ -61,7 +59,7 @@ const Pagos = () => {
     // Obtener los pagos
     const getValidAbonosByTurno = async () => {
         try {
-            const res = await axios.get(`${API_BASE}caja/abonosValid-turno/${state.id}?page=${page}&limit=10`, {
+            const res = await axios.get(`${API_BASE}caja/abonosValid-turno/${turnoId}?page=${page}&limit=10`, {
             headers: { Authorization: `Bearer ${token}` }
             });
             setLoading(false)
@@ -77,7 +75,7 @@ const Pagos = () => {
         await getValidAbonosByTurno()
     }
     get()
-    },[state.id, page])
+    },[turnoId, page])
 
     return (
     <div style={{ padding: 20, paddingBottom: 70 }}>

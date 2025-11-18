@@ -30,6 +30,7 @@ const Home = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDataDash(res.data)
+      localStorage.setItem('turno', res.data.turno.id)
     } catch (err) {
       setDataDash({
         "creditos_activos": 0,
@@ -216,9 +217,7 @@ const Home = () => {
                   </Box>} 
                   sx={{width:'48%', height:'100px', padding:1, borderRadius: 3, border: `1px solid ${borderColor}`}} 
                   variant="contained"
-                  onClick={() => navigate(element.link, {
-                                  state: dataDash.turno
-                                })}
+                  onClick={() => navigate(element.link)}
                 />
               )
             })
