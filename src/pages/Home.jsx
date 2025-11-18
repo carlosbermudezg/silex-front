@@ -30,7 +30,8 @@ const Home = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setDataDash(res.data)
-      localStorage.setItem('turno', res.data.turno.id)
+      console.log(res.data)
+      // localStorage.setItem('turno', res.data.turno.id)
     } catch (err) {
       setDataDash({
         "creditos_activos": 0,
