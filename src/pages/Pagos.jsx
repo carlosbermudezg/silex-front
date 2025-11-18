@@ -66,6 +66,7 @@ const Pagos = () => {
             setTotalPages(res.data.totalPages)
             setAbonos(res.data.data); // Los movimientos de la página actual
         } catch (err) {
+            setLoading(false)
             // console.error(err);
         }
     };
@@ -96,7 +97,7 @@ const Pagos = () => {
 
         {/* Lista de gastos */}
         {loading ? (
-        <CircularProgress />
+        <CircularProgress color='info'/>
         ) : abonos.length === 0 ? (
         <Typography variant="body1">No hay comprobantes registrados hoy.</Typography>
         ) : (
