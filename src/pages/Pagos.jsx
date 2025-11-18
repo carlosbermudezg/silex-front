@@ -23,6 +23,7 @@ const API_BASE = `${import.meta.env.VITE_API_URL}`;
 
 const Pagos = () => {
     const { state } = useLocation();
+    console.log(state)
     const [abonos, setAbonos] = useState([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(1);
