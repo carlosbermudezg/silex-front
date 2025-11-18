@@ -31,7 +31,7 @@ const Home = () => {
       });
       setDataDash(res.data)
       console.log(res.data)
-      // localStorage.setItem('turno', res.data.turno.id)
+      localStorage.setItem('turno', res.data.turno.id)
     } catch (err) {
       setDataDash({
         "creditos_activos": 0,
