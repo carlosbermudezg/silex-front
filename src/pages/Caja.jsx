@@ -30,7 +30,6 @@ const API_BASE = `${import.meta.env.VITE_API_URL}`;
 const Caja = () => {
   const [caja, setCaja] = useState({id:0});
   const [movimientos, setMovimientos] = useState([]);
-  const [turno, setTurno] = useState({id: 0});
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10); 
@@ -91,10 +90,8 @@ const Caja = () => {
       const response = await axios.get(`${API_BASE}caja/turno/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setTurno(response.data)
       await getMovimientos(response.data.id, page, 10)
     } catch (err) {
-      setTurno({})
       setMovimientos([])
     }
   };

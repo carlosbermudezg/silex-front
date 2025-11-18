@@ -45,8 +45,6 @@ const InfoCredito = () => {
   const deudaInicial = Number(credito.detalles.monto) + Number(credito.detalles.monto_interes_generado)
   const deudaMinima = deudaInicial * porcentajeRenovacion / 100
 
-  console.log(credito)
-
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false)
   const [selectedImage, setSelectedImage] = useState(null);
@@ -180,7 +178,6 @@ const InfoCredito = () => {
       Authorization: `Bearer ${token}`,
       },
     }).then((response)=>{
-      console.log(response.data)
       const monto_minimo = Number(response.data.monto_minimo) + (Number(credito.detalles.saldo_capital) + Number(credito.detalles.saldo_interes))
       const monto_maximo = Number(response.data.monto_maximo)
       setPlazoMaximo(response.data.plazo_maximo)

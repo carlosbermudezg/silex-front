@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
+import { useTheme } from '@mui/material/styles';
 import {
   Typography,
   List,
@@ -20,31 +22,14 @@ import toast from 'react-hot-toast';
 const API_BASE = `${import.meta.env.VITE_API_URL}`;
 
 const Pagos = () => {
+    const { state } = useLocation();
     const [abonos, setAbonos] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [turno, setTurno] = useState({id:0})
-    const [ruta, setRuta] = useState([])
-    const [caja, setCaja] = useState(null)
-
     const [page, setPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-
+    const theme =useTheme();
     const token = localStorage.getItem('token');
     const user = jwtDecode(token);
-
-    const obtenerRuta = async () => {
-        try {
-          const res = await axios.get(`${API_BASE}rutas/usuario/${user.userId}`, {
-            headers: { Authorization: `Bearer ${token}` },
-            params: { page: 1, limit: 10 },
-          });
-        //   setConfig(res.data.data[0].config)
-          setRuta(res?.data?.data[0]);
-          await obtenerCaja(res?.data?.data[0].id)
-        } catch (err) {
-          console.error('Error al obtener rutas del usuario:', err);
-        }
-    };
 
     // Obtener el comprobante de pago en pdf
     const downloadComprobante = async (id) => {
@@ -72,10 +57,10 @@ const Pagos = () => {
         }
     };
 
-    // Obtener las categorias de egresos
-    const getValidAbonosByTurno = async (id) => {
+    // Obtener los pagos
+    const getValidAbonosByTurno = async () => {
         try {
-            const res = await axios.get(`${API_BASE}caja/abonosValid-turno/${id}?page=${page}&limit=7`, {
+            const res = await axios.get(`${API_BASE}caja/abonosValid-turno/${state.id}?page=${page}&limit=10`, {
             headers: { Authorization: `Bearer ${token}` }
             });
             setLoading(false)
@@ -86,44 +71,12 @@ const Pagos = () => {
         }
     };
 
-    // Obtener el estado de la caja
-    const obtenerTurno = async (id) => {
-        try {
-            const response = await axios.get(`${API_BASE}caja/turno/${id}`, {
-            headers: { Authorization: `Bearer ${token}` },
-            });
-            setTurno(response.data)
-        } catch (err) {
-            setTurno({})
-        }
-    };
-
-    // Obtener el estado de la caja
-    const obtenerCaja = async (rutaId = 0) => {
-    try {
-        const response = await axios.get(`${API_BASE}caja/ruta/${rutaId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-        });
-        await obtenerTurno(response?.data?.id)
-        setCaja(response?.data)
-    } catch (err) {
-        toast.error('error')
-    }
-    };
-
-    useEffect(() => {
-        const get = async()=>{
-            await obtenerRuta()
-        }
-        get();
-    }, []);
-
     useEffect(()=>{
     const get = async()=>{
-        await getValidAbonosByTurno(turno.id)
+        await getValidAbonosByTurno()
     }
     get()
-    },[turno, page])
+    },[state.id, page])
 
     return (
     <div style={{ padding: 20, paddingBottom: 70 }}>
@@ -140,7 +93,7 @@ const Pagos = () => {
                 color="primary"
                 size="small"
             />
-            </Box>
+        </Box>
 
         {/* Lista de gastos */}
         {loading ? (
@@ -151,7 +104,7 @@ const Pagos = () => {
         <>
             <List>
             {abonos.map((abono) => (
-                <Paper key={abono.id} sx={{ mb: 1 }}>
+                <Paper key={abono.id} sx={{ mb: 1, backgroundColor: theme.palette.primary.main }}>
                     <Chip
                         label={`$ ${abono.monto}`}
                         color='success'

@@ -82,7 +82,6 @@ const Creditos = () => {
   }
 
   const fetchCreditos = async (pagina = 1, search = '') => {
-    console.log({search})
     if (search != ''){
       setPage(1)
     }

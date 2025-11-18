@@ -30,7 +30,6 @@ const App = () => {
         const lat = pos.coords.latitude;
         const lng = pos.coords.longitude;
         setUbicacionCobrador({ lat, lng });
-        console.log(pos)
       },
       (pos) => {
         console.log(pos)

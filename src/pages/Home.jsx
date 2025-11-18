@@ -96,13 +96,6 @@ const Home = () => {
       link: '/ruta',
       disabled: false
     },
-    // {
-    //   name: 'Ruta',
-    //   icon: '/ruta3.png',
-    //   title : 'Ruta de cobros del día',
-    //   link: '/rutamapa',
-    //   disabled: false
-    // },
     {
       name: 'Reportes',
       icon: '/reportes.png',
@@ -223,7 +216,9 @@ const Home = () => {
                   </Box>} 
                   sx={{width:'48%', height:'100px', padding:1, borderRadius: 3, border: `1px solid ${borderColor}`}} 
                   variant="contained"
-                  onClick={() => navigate(element.link)} 
+                  onClick={() => navigate(element.link, {
+                                  state: dataDash.turno
+                                })}
                 />
               )
             })

@@ -424,7 +424,23 @@ const RegistrarCredito = () => {
               }
               filterOptions={(x) => x}
               loading={loadingClientes}
-              renderInput={(params) => <TextField {...params} label="Selecciona un cliente" fullWidth />}
+              renderInput={(params) => 
+                <TextField
+                 {...params} label="Selecciona un cliente" fullWidth 
+                 sx={{
+                    "& label": {
+                      color: "#9e9e9e", // color normal
+                    },
+                    "& label.Mui-focused": {
+                      color: "#fff", // 👈 color cuando está seleccionado
+                    },
+                    "& .MuiOutlinedInput-root": {
+                      "& fieldset": { borderColor: "#9e9e9e" }, // borde normal
+                      "&:hover fieldset": { borderColor: "#2e84dbff" }, // hover
+                      "&.Mui-focused fieldset": { borderColor: "1976d2", color:"#fff" }, // 👈 color cuando está seleccionado
+                    },
+                  }}
+                />}
             />
             <Typography variant='caption'>Producto: *</Typography>
             <TextField
