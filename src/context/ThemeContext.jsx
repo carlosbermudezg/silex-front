@@ -18,11 +18,22 @@ export function ThemeProvider({ children }) {
   });
 
   useEffect(() => {
+    // Guardamos el tema en localStorage
     localStorage.setItem("theme", mode);
-    if (typeof window !== 'undefined' && window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === 'function') {
-      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'theme', mode, color: statusBarColor }));
-    }
 
+    // Color que la app móvil usará para la barra de estado
+    const statusBarColor = mode === "dark" ? "#101922" : "#ffffff";
+
+    // Enviamos el mensaje solo si estamos dentro de un WebView de React Native
+    if (
+      typeof window !== "undefined" &&
+      window.ReactNativeWebView &&
+      typeof window.ReactNativeWebView.postMessage === "function"
+    ) {
+      window.ReactNativeWebView.postMessage(
+        JSON.stringify({ type: "theme", mode, color: statusBarColor })
+      );
+    }
   }, [mode]);
 
   const toggleTheme = () => setMode((prev) => (prev === "light" ? "dark" : "light"));
