@@ -19,7 +19,7 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     localStorage.setItem("theme", mode);
-    const statusBarColor = theme.palette.background.default;
+    const statusBarColor = mode === 'dark' ? '#101922' : '#f6f7f8';
     window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'theme', mode, color: statusBarColor }));
   }, [mode]);
 
