@@ -19,8 +19,10 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     localStorage.setItem("theme", mode);
-    const statusBarColor = mode === 'dark' ? '#101922' : '#f6f7f8';
-    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'theme', mode, color: statusBarColor }));
+    if (typeof window !== 'undefined' && window.ReactNativeWebView && typeof window.ReactNativeWebView.postMessage === 'function') {
+      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'theme', mode, color: statusBarColor }));
+    }
+
   }, [mode]);
 
   const toggleTheme = () => setMode((prev) => (prev === "light" ? "dark" : "light"));
