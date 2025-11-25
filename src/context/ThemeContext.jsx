@@ -19,9 +19,8 @@ export function ThemeProvider({ children }) {
 
   useEffect(() => {
     localStorage.setItem("theme", mode);
-    if (window.ReactNativeWebView) {
-      window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'theme', mode }));
-    }
+    const statusBarColor = mode === 'dark' ? '#6f1080ff' : '#ffffff';
+    window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'theme', mode, color: statusBarColor }));
   }, [mode]);
 
   const toggleTheme = () => setMode((prev) => (prev === "light" ? "dark" : "light"));
