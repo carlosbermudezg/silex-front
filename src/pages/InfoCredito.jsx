@@ -89,18 +89,18 @@ const InfoCredito = () => {
     );
   }, []);
 
-  const renewCredito = async()=>{
-    
-    if(deudaMinima < (Number(credito.detalles.saldo_capital) + Number(credito.detalles.saldo_interes))){
-      return toast.error(`El valor adeudado supera el valor permitido de deuda para renovar: $ ${deudaMinima.toFixed(2)}.`, {position:'bottom-center'})
-    }
-    
-    if(valorRenovacion < montoMinimo){
-      return toast.error(`El valor de renovación no puede ser menor de $ ${montoMinimo.toFixed(2)}.`, {position:'bottom-center'})
+  const renewCredito = async () => {
+
+    if (deudaMinima < (Number(credito.detalles.saldo_capital) + Number(credito.detalles.saldo_interes))) {
+      return toast.error(`El valor adeudado supera el valor permitido de deuda para renovar: $ ${deudaMinima.toFixed(2)}.`, { position: 'bottom-center' })
     }
 
-    if(valorRenovacion > montoMaximo){
-      return toast.error(`El valor de renovación no superar $ ${montoMaximo.toFixed(2)}.`, {position:'bottom-center'})
+    if (valorRenovacion < montoMinimo) {
+      return toast.error(`El valor de renovación no puede ser menor de $ ${montoMinimo.toFixed(2)}.`, { position: 'bottom-center' })
+    }
+
+    if (valorRenovacion > montoMaximo) {
+      return toast.error(`El valor de renovación no superar $ ${montoMaximo.toFixed(2)}.`, { position: 'bottom-center' })
     }
 
 
@@ -118,27 +118,27 @@ const InfoCredito = () => {
     setPuntoSeleccionado(null);
   };
 
-  const handlePagar = async() => {
+  const handlePagar = async () => {
     setLoading(true)
     const pago = {
-      creditoId : puntoSeleccionado.id,
-      valor : Number(valorPagar),
+      creditoId: puntoSeleccionado.id,
+      valor: Number(valorPagar),
       metodoPago: metodoPago,
-      location: `${ubicacionActual.lat}`+','+`${ubicacionActual.lng}`
+      location: `${ubicacionActual.lat}` + ',' + `${ubicacionActual.lng}`
     }
 
     const response = await axios.post(`${import.meta.env.VITE_API_URL}creditos/pagar`, pago, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
-    }).then((response)=> {
-      toast.success('Se ha registrado el pago con éxito', {position:'bottom-center'})
+    }).then((response) => {
+      toast.success('Se ha registrado el pago con éxito', { position: 'bottom-center' })
       setRender(!render)
     })
-    .catch((error) => {
-      toast.error(error.response.data.error, {position:'bottom-center'})
-      console.log(error)
-    })
+      .catch((error) => {
+        toast.error(error.response.data.error, { position: 'bottom-center' })
+        console.log(error)
+      })
 
     setLoading(false)
     // Cerrar el modal después de registrar el pago
@@ -148,36 +148,55 @@ const InfoCredito = () => {
   // Obtener el comprobante de pago en pdf
   const downloadComprobante = async (id) => {
     try {
-    const response = await axios.get(`${API_BASE}caja/comprobante/${id}`, {
-        responseType: 'blob', 
-        headers: {
-        Authorization: `Bearer ${token}`,
-        },
-    });
+      // Check if running in React Native WebView
+      const isReactNative = typeof window !== 'undefined' &&
+        window.ReactNativeWebView &&
+        typeof window.ReactNativeWebView.postMessage === 'function';
 
-    const blob = new Blob([response.data], { type: 'application/pdf' });
-    const url = window.URL.createObjectURL(blob);
+      if (isReactNative) {
+        // In React Native, send download message with direct API URL
+        const downloadUrl = `${API_BASE}caja/comprobante/${id}`;
+        window.ReactNativeWebView.postMessage(JSON.stringify({
+          type: 'download',
+          url: downloadUrl,
+          token: token,
+          filename: `comprobante_pago_${id}.pdf`
+        }));
+        toast.success('Descargando comprobante...');
+      } else {
+        // In regular browser, use blob download
+        const response = await axios.get(`${API_BASE}caja/comprobante/${id}`, {
+          responseType: 'blob',
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
 
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `comprobante_pago_${id}.pdf`);
-    document.body.appendChild(link);
-    link.click();
-    link.remove();
+        const blob = new Blob([response.data], { type: 'application/pdf' });
+        const url = window.URL.createObjectURL(blob);
 
-    window.URL.revokeObjectURL(url);
+        const link = document.createElement('a');
+        link.href = url;
+        link.setAttribute('download', `comprobante_pago_${id}.pdf`);
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+
+        window.URL.revokeObjectURL(url);
+      }
     } catch (error) {
-    console.error('Error al descargar el comprobante:', error);
+      console.error('Error al descargar el comprobante:', error);
+      toast.error('Error al descargar el comprobante');
     }
   };
 
   //Obtener la configuracion de ruta por usuario
-  const getRutaConfig = async()=>{
+  const getRutaConfig = async () => {
     await axios.get(`${API_BASE}config/ruta/${credito.detalles.cliente.rutaId}`, {
       headers: {
-      Authorization: `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
-    }).then((response)=>{
+    }).then((response) => {
       const monto_minimo = Number(response.data.monto_minimo) + (Number(credito.detalles.saldo_capital) + Number(credito.detalles.saldo_interes))
       const monto_maximo = Number(response.data.monto_maximo)
       setPlazoMaximo(response.data.plazo_maximo)
@@ -185,15 +204,15 @@ const InfoCredito = () => {
       setMontoMinimo(monto_minimo)
       setMontoMaximo(monto_maximo)
       setConfig(response.data)
-    }).catch( error => toast.error('Error al obtener la configuración', {position:'bottom-center'}))
+    }).catch(error => toast.error('Error al obtener la configuración', { position: 'bottom-center' }))
   }
 
-  useEffect(()=>{
-    const get = async()=>{
+  useEffect(() => {
+    const get = async () => {
       await getRutaConfig()
     }
     get()
-  },[])
+  }, [])
 
   if (!credito) {
     return (
@@ -229,7 +248,7 @@ const InfoCredito = () => {
           zIndex: 999,
           gap: 3,
           backgroundColor: theme.palette.background.default,
-          borderBottom: `1px solid ${ theme.palette.border }`,
+          borderBottom: `1px solid ${theme.palette.border}`,
           height: '60px',
           display: 'flex',
           alignItems: 'center',
@@ -241,7 +260,7 @@ const InfoCredito = () => {
         <Typography variant='h6'>Información del crédito</Typography>
       </Box>
 
-      <Card 
+      <Card
         sx={{
           backgroundColor: theme.palette.background.primary
         }}>
@@ -265,11 +284,11 @@ const InfoCredito = () => {
             renovarCredito &&
             <>
               <Button
-                  sx={{width:'100%', marginTop:1}}
-                  variant='contained'
-                  color='primary'
-                  startIcon={<CurrencyExchange></CurrencyExchange>}
-                  onClick={()=> setOpenModal(true)}
+                sx={{ width: '100%', marginTop: 1 }}
+                variant='contained'
+                color='primary'
+                startIcon={<CurrencyExchange></CurrencyExchange>}
+                onClick={() => setOpenModal(true)}
               >Renovar Crédito</Button>
               <Divider sx={{ my: 2 }} />
             </>
@@ -299,7 +318,7 @@ const InfoCredito = () => {
               color: '#fff',
               marginLeft: '10px'
             }}
-            onClick={()=> handleOpenModal(credito)}
+            onClick={() => handleOpenModal(credito)}
           >Pagar</Button>
 
           {cuotasFiltradas.length === 0 ? (
@@ -312,30 +331,31 @@ const InfoCredito = () => {
 
               {cuotasPaginadas.map((cuota) => {
                 const color = cuota.estado === 'pagado' ? theme.palette.green : theme.palette.orange
-                return(
-                <Card
-                  key={cuota.id}
-                  sx={{
-                    mb: 1,
-                    backgroundColor: theme.palette.background.secondary,
-                    color: theme.palette.text.primary,
-                  }}
-                >
-                  <CardContent>
-                    <Typography><strong>Monto:</strong> $ {cuota.monto.toFixed(2)}</Typography>
-                    <Typography><strong>Fecha:</strong> {new Date(cuota.fecha_pago).toLocaleDateString()}</Typography>
-                    <strong>Abonado: </strong><Chip sx={{ backgroundColor: color }} size='small' label={`$ ${cuota.monto_pagado.toFixed(2)}`}></Chip>
-                    <Typography><strong>Estado:</strong> {cuota.estado}</Typography>
-                  </CardContent>
-                </Card>
-              )})}
+                return (
+                  <Card
+                    key={cuota.id}
+                    sx={{
+                      mb: 1,
+                      backgroundColor: theme.palette.background.secondary,
+                      color: theme.palette.text.primary,
+                    }}
+                  >
+                    <CardContent>
+                      <Typography><strong>Monto:</strong> $ {cuota.monto.toFixed(2)}</Typography>
+                      <Typography><strong>Fecha:</strong> {new Date(cuota.fecha_pago).toLocaleDateString()}</Typography>
+                      <strong>Abonado: </strong><Chip sx={{ backgroundColor: color }} size='small' label={`$ ${cuota.monto_pagado.toFixed(2)}`}></Chip>
+                      <Typography><strong>Estado:</strong> {cuota.estado}</Typography>
+                    </CardContent>
+                  </Card>
+                )
+              })}
               <Box display="flex" justifyContent="center" mt={2}>
                 <Pagination
-                  sx={{width:'100%', borderRadius:3, display:'flex', justifyContent:'center', border: `1px solid ${ theme.palette.border }`, p:1, mt:1}}
+                  sx={{ width: '100%', borderRadius: 3, display: 'flex', justifyContent: 'center', border: `1px solid ${theme.palette.border}`, p: 1, mt: 1 }}
                   count={totalPagesCuotas}
                   page={page}
                   onChange={(e, val) => setPage(val)}
-                  color= { theme.palette.background.default }        
+                  color={theme.palette.background.default}
                   shape='rounded'
                   variant='outlined'
                   size="small"
@@ -367,34 +387,34 @@ const InfoCredito = () => {
                   <CardContent>
                     <Typography><strong>Monto: </strong>${pago.monto}</Typography>
                     <Typography><strong>Fecha: </strong>
-                        {new Date(pago.createdAt).toLocaleString('es-EC', {
-                          timeZone: 'America/Guayaquil',
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit',
-                          hour12: false,
-                        })}
+                      {new Date(pago.createdAt).toLocaleString('es-EC', {
+                        timeZone: 'America/Guayaquil',
+                        day: '2-digit',
+                        month: '2-digit',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                      })}
                     </Typography>
                     <Typography><strong>Método: </strong> {pago.metodoPago || 'No especificado'}</Typography>
                     <Button
-                        sx={{width:'100%', marginTop:1}}
-                        variant='contained'
-                        color='info'
-                        startIcon={<Download></Download>}
-                        onClick={()=> downloadComprobante(pago.id)}
+                      sx={{ width: '100%', marginTop: 1 }}
+                      variant='contained'
+                      color='info'
+                      startIcon={<Download></Download>}
+                      onClick={() => downloadComprobante(pago.id)}
                     >Descargar</Button>
                   </CardContent>
                 </Card>
               ))}
               <Box display="flex" justifyContent="center" mt={2}>
                 <Pagination
-                  sx={{width:'100%', borderRadius:3, display:'flex', justifyContent:'center', border: `1px solid ${ theme.palette.border }`, p:1, mt:1}}
+                  sx={{ width: '100%', borderRadius: 3, display: 'flex', justifyContent: 'center', border: `1px solid ${theme.palette.border}`, p: 1, mt: 1 }}
                   count={totalPagesPagos}
                   page={pagePagos}
                   onChange={(e, val) => setPagePagos(val)}
-                  color= { theme.palette.background.default }        
+                  color={theme.palette.background.default}
                   shape='rounded'
                   variant='outlined'
                   size="small"
@@ -461,11 +481,11 @@ const InfoCredito = () => {
       )}
 
       {/* Modal para renovar el credito */}
-      <Dialog open={openModal} onClose={()=> setOpenModal(false)}>
+      <Dialog open={openModal} onClose={() => setOpenModal(false)}>
         <DialogTitle>Renovación de crédito</DialogTitle>
         <DialogContent>
           <Typography variant='caption'>¿Está seguro que desea renovar este crédito?</Typography>
-          <section style={{display:'flex', flexDirection:'column', gap:10}}>
+          <section style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             <TextField
               autoFocus
               margin="dense"
@@ -483,7 +503,7 @@ const InfoCredito = () => {
               label="Plazo en días"
               name="plazo"
               value={plazo}
-              onChange={(e)=> setPlazo(e.target.value)}
+              onChange={(e) => setPlazo(e.target.value)}
               type="number"
               inputProps={{ min: 1 }}
             />
@@ -494,10 +514,10 @@ const InfoCredito = () => {
               label="Frecuencia de pago"
               name="frecuencia_pago"
               value={frecuencia}
-              onChange={(e)=> setFrecuencia(e.target.value)}
+              onChange={(e) => setFrecuencia(e.target.value)}
               disabled={!config}
-              // error={Boolean(errors.frecuencia_pago)}
-              // helperText={errors.frecuencia_pago}
+            // error={Boolean(errors.frecuencia_pago)}
+            // helperText={errors.frecuencia_pago}
             >
               {(config && config.frecuencia_pago ?
                 JSON.parse('["' + config.frecuencia_pago.replace(/[{}]/g, '').replace(/,/g, '","') + '"]') : []
@@ -514,10 +534,10 @@ const InfoCredito = () => {
           <Typography variant='caption'>Valor a entregar: $ {valorRenovacion <= 0 ? 0 : ((valorRenovacion) - (Number(credito.detalles.saldo_capital) + Number(credito.detalles.saldo_interes)).toFixed(2))}</Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={()=> setOpenModal(false)} color="primary">
+          <Button onClick={() => setOpenModal(false)} color="primary">
             Cancelar
           </Button>
-          <Button onClick={()=> renewCredito()} color="success">
+          <Button onClick={() => renewCredito()} color="success">
             Renovar
           </Button>
         </DialogActions>
@@ -538,20 +558,20 @@ const InfoCredito = () => {
             variant="outlined"
           />
           <TextField
-              fullWidth
-              select
-              label="Método de pago"
-              name="metodoPago"
-              value={metodoPago}
-              onChange={(e)=> setMetodoPago(e.target.value)}
-            >
-                <MenuItem key="1" value="Efectivo">
-                  Efectivo
-                </MenuItem>
-                <MenuItem key="2" value="Transferencia">
-                  Transferencia
-                </MenuItem>
-            </TextField>
+            fullWidth
+            select
+            label="Método de pago"
+            name="metodoPago"
+            value={metodoPago}
+            onChange={(e) => setMetodoPago(e.target.value)}
+          >
+            <MenuItem key="1" value="Efectivo">
+              Efectivo
+            </MenuItem>
+            <MenuItem key="2" value="Transferencia">
+              Transferencia
+            </MenuItem>
+          </TextField>
         </DialogContent>
         <DialogActions>
           <Button onClick={handleCloseModal} color="primary">
