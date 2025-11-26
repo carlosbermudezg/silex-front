@@ -22,7 +22,7 @@ export function ThemeProvider({ children }) {
     localStorage.setItem("theme", mode);
 
     // Color que la app móvil usará para la barra de estado
-    const statusBarColor = mode === "dark" ? "#101922" : "#ffffff";
+    const statusBarColor = mode === "dark" ? "#101922" : "#f6f7f8";
 
     // Enviamos el mensaje solo si estamos dentro de un WebView de React Native
     if (
