@@ -1,17 +1,17 @@
 import { useThemeContext } from '../context/ThemeContext'
 
-const Logo = ()=>{
+const Logo = () => {
 
     const { mode } = useThemeContext()
 
-    return(
+    return (
         <section style={{
             display: 'flex',
-            justifyContent:'center',
-            alignItems:'center'
+            justifyContent: 'center',
+            alignItems: 'center'
         }}>
             {
-                mode === 'dark' ? <img width={130} src='logo-d.png'></img> : <img width={130} src='logo-l.png'></img>
+                mode === 'dark' ? <img width={50} src='logo-d.png'></img> : <img width={50} src='logo-l.png'></img>
             }
         </section>
     )
