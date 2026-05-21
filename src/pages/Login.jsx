@@ -11,6 +11,7 @@ import { useTheme } from '@mui/material/styles';
 function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [company, setCompany] = useState('');
   const navigate = useNavigate();
   const theme = useTheme();
 
@@ -24,7 +25,11 @@ function Login() {
       duration: 1000, // El toast permanecerá hasta que se cierre manualmente
     });
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}login`, { email, password })
+       const res = await axios.post(
+         `${import.meta.env.VITE_API_URL}login`,
+         { email, password },
+         { headers: { 'x-tenant': company } }
+       )
       localStorage.setItem('token', res.data.token);
       if (res.data.loginCon === 'codigo_seguridad') {
         window.location.href = 'https://www.youtube.com';
@@ -125,36 +130,67 @@ function Login() {
           }}
         >
           <Typography variant='caption'>Contraseña</Typography>
-          <Box sx={{ width: '100%', display: 'flex', border: `1px solid ${theme.palette.textField.superior}`, borderRadius: 2, overflow: 'hidden' }}>
-            <Box sx={{ display: 'flex', padding: 1, backgroundColor: theme.palette.textField.main, justifyContent: 'center', alignItems: 'center' }}>
-              <LockOutline></LockOutline>
-            </Box>
-            <TextField
-              size='small'
-              type="password"
-              sx={{
-                '& .MuiInputBase-input': {
-                  caretColor: theme.palette.textField.cursor, // color del cursor
-                  backgroundColor: theme.palette.textField.main
-                },
-                '& .MuiOutlinedInput-root': {
-                  '& fieldset': {
-                    borderColor: theme.palette.textField.border, // color normal
-                  },
-                  '&:hover fieldset': {
-                    borderColor: theme.palette.textField.border,
-                  },
-                  '&.Mui-focused fieldset': {
-                    borderColor: theme.palette.textField.border,
-                  },
-                },
-              }}
-              placeholder='Ingresa tu contraseña'
-              fullWidth
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </Box>
+           <Box sx={{ width: '100%', display: 'flex', border: `1px solid ${theme.palette.textField.superior}`, borderRadius: 2, overflow: 'hidden' }}>
+             <Box sx={{ display: 'flex', padding: 1, backgroundColor: theme.palette.textField.main, justifyContent: 'center', alignItems: 'center' }}>
+               <LockOutline/>
+             </Box>
+             <TextField
+               size='small'
+               type="password"
+               sx={{
+                 '& .MuiInputBase-input': {
+                   caretColor: theme.palette.textField.cursor, // color del cursor
+                   backgroundColor: theme.palette.textField.main
+                 },
+                 '& .MuiOutlinedInput-root': {
+                   '& fieldset': {
+                     borderColor: theme.palette.textField.border, // color normal
+                   },
+                   '&:hover fieldset': {
+                     borderColor: theme.palette.textField.border,
+                   },
+                   '&.Mui-focused fieldset': {
+                     borderColor: theme.palette.textField.border,
+                   },
+                 },
+               }}
+               placeholder='Ingresa tu contraseña'
+               fullWidth
+               value={password}
+               onChange={(e) => setPassword(e.target.value)}
+             />
+           </Box>
+           {/* New Company Field */}
+           <Box sx={{ width: '100%', display: 'flex', border: `1px solid ${theme.palette.textField.superior}`, borderRadius: 2, overflow: 'hidden', mt: 1 }}>
+             <Box sx={{ display: 'flex', padding: 1, backgroundColor: theme.palette.textField.main, justifyContent: 'center', alignItems: 'center' }}>
+               <MailOutline/>
+             </Box>
+             <TextField
+               size='small'
+               type="text"
+               sx={{
+                 '& .MuiInputBase-input': {
+                   caretColor: theme.palette.textField.cursor,
+                   backgroundColor: theme.palette.textField.main
+                 },
+                 '& .MuiOutlinedInput-root': {
+                   '& fieldset': {
+                     borderColor: theme.palette.textField.border,
+                   },
+                   '&:hover fieldset': {
+                     borderColor: theme.palette.textField.border,
+                   },
+                   '&.Mui-focused fieldset': {
+                     borderColor: theme.palette.textField.border,
+                   },
+                 },
+               }}
+               placeholder='Ingresa la empresa'
+               fullWidth
+               value={company}
+               onChange={(e) => setCompany(e.target.value)}
+             />
+           </Box>
         </Box>
         <Button
           variant="contained"
