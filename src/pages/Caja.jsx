@@ -28,11 +28,11 @@ import { useTheme } from '@mui/material/styles';
 const API_BASE = `${import.meta.env.VITE_API_URL}`;
 
 const Caja = () => {
-  const [caja, setCaja] = useState({id:0});
+  const [caja, setCaja] = useState({ id: 0 });
   const [movimientos, setMovimientos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10); 
+  const [rowsPerPage, setRowsPerPage] = useState(10);
   const [totalPages, setTotalPages] = useState(0);
 
   const theme = useTheme()
@@ -60,7 +60,7 @@ const Caja = () => {
       const res = await axios.get(`${API_BASE}caja/movimientos`, {
         headers: { Authorization: `Bearer ${token}` },
         params: {
-          turnoId : id,
+          turnoId: id,
           page: pageMov, // El backend espera que la página comience en 1
           limit,
         },
@@ -105,32 +105,32 @@ const Caja = () => {
     init();
   }, [page, rowsPerPage]);
 
-  useEffect(()=>{
-    const get = async()=>{
+  useEffect(() => {
+    const get = async () => {
       await obtenerTurno(caja.id)
     }
     get()
-  },[caja, page])
+  }, [caja, page])
 
   return (
     <Box display="flex" flexDirection="column" alignItems="center" p={1.5} pb={8}>
-      <Box sx={{width:'100%'}}>
-      <Typography variant="h6" gutterBottom>
-        Caja
-      </Typography>
-        <Box sx={{display:'flex', gap: 1, flexWrap:'wrap', justifyContent:'center'}}>
+      <Box sx={{ width: '100%' }}>
+        <Typography variant="h6" gutterBottom>
+          Caja
+        </Typography>
+        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', justifyContent: 'center' }}>
           <Button
             children={
-            <Box sx={{display:'flex', alignItems:'center', width:'100%', justifyContent:'space-between', padding:2}}>
-              <IconApp route='/caja.png'></IconApp>
-              <Box>
-              <Typography sx={{fontSize:'12px', fontWeight:'bold', textTransform: 'uppercase'}}>Caja <label style={{color:colorStatus}}>{caja.estado}</label></Typography>
-              <Typography sx={{fontSize:'28px'}}>$ {caja.saldoActual}</Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', justifyContent: 'space-between', padding: 2 }}>
+                <IconApp route='/caja.png'></IconApp>
+                <Box>
+                  <Typography sx={{ fontSize: '12px', fontWeight: 'bold', textTransform: 'uppercase' }}>Caja <label style={{ color: colorStatus }}>{caja.estado}</label></Typography>
+                  <Typography sx={{ fontSize: '28px' }}>$ {caja.saldoActual}</Typography>
+                </Box>
+                <DoubleArrow fontSize='32px' sx={{ color: colorStatus }}></DoubleArrow>
               </Box>
-              <DoubleArrow fontSize='32px' sx={{color:colorStatus}}></DoubleArrow>
-            </Box>
             }
-            sx={{width:'100%', height:'130px', fontSize:'40px', padding:0, border: `0px solid ${colorStatus}`, backgroundColor:'#05112e', color: white, borderRadius: 3}} 
+            sx={{ width: '100%', height: '130px', fontSize: '40px', padding: 0, border: `0px solid ${colorStatus}`, backgroundColor: '#05112e', color: white, borderRadius: 3 }}
             variant="contained"
             onClick={() => navigate('/caja')}
           />
@@ -142,7 +142,7 @@ const Caja = () => {
       </Typography>
       <Typography variant="caption">{`${capitalizar(diaSemana)}, ${fechaCompleta}`}</Typography>
 
-      <TableContainer component={Paper} sx={{ width: '100%', borderRadius:3, padding:1, backgroundColor: theme.palette.background.default}}>
+      <TableContainer component={Paper} sx={{ width: '100%', borderRadius: 3, padding: 1, backgroundColor: theme.palette.background.default }}>
         <Table size="small">
           <TableHead>
             <TableRow>
@@ -163,7 +163,7 @@ const Caja = () => {
                 }
                 return (
                   <TableRow key={mov.id}>
-                    <TableCell sx={{width:'80%'}}>
+                    <TableCell sx={{ width: '80%' }}>
                       <Typography variant='caption'>{mov.descripcion}</Typography>
                       <br />
                       <Typography variant='caption'>
@@ -178,12 +178,12 @@ const Caja = () => {
                         })}
                       </Typography>
                     </TableCell>
-                    <TableCell sx={{p:0, textAlign:'right'}}>
-                      <Typography color={color} sx={{width:'100%', textAlign:'right'}} variant="caption">
+                    <TableCell sx={{ p: 0, textAlign: 'right' }}>
+                      <Typography color={color} sx={{ width: '100%', textAlign: 'right' }} variant="caption">
                         {simbol} ${mov.monto}
                       </Typography>
                       <br />
-                      <Typography color="textSecondary" variant="caption" sx={{width:'100%', textAlign:'right'}}>
+                      <Typography color="textSecondary" variant="caption" sx={{ width: '100%', textAlign: 'right' }}>
                         ${mov.saldo}
                       </Typography>
                     </TableCell>
@@ -201,7 +201,7 @@ const Caja = () => {
         </Table>
       </TableContainer>
       <Pagination
-        sx={{width:'100%', borderRadius:3, display:'flex', justifyContent:'center', border: `1px solid ${gray}`, p:1, mt:1}}
+        sx={{ width: '100%', borderRadius: 3, display: 'flex', justifyContent: 'center', border: `1px solid ${gray}`, p: 1, mt: 1 }}
         variant='outlined'
         boundaryCount={1}
         siblingCount={0}
@@ -209,7 +209,7 @@ const Caja = () => {
         count={totalPages}
         page={page}
         onChange={(event, value) => setPage(value)}
-        color= { theme.palette.background.default }
+        color={theme.palette.background.default}
       />
     </Box>
   );

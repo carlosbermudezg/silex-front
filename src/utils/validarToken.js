@@ -9,7 +9,7 @@ export const validarToken = () => {
 
   try {
     const decoded = jwtDecode(token);
-    const exp = decoded.exp * 1000; // pasa de segundos a milisegundos
+    const exp = decoded.exp * 1000;
     const now = Date.now();
 
     if (exp < now) {
@@ -20,7 +20,6 @@ export const validarToken = () => {
     return true; // Token válido
   } catch (error) {
     localStorage.removeItem('token');
-    console.log(error)
     return false;
   }
 };

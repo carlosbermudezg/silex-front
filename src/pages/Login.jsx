@@ -15,7 +15,7 @@ function Login() {
   const theme = useTheme();
 
   const handleLogin = async () => {
-    if(email == '' || password == '') {
+    if (email == '' || password == '') {
       return toast.error('Los campos no pueden estar vacíos', { duration: 1000, position: 'bottom-center', });
     }
     // Mostrar el toast de carga
@@ -24,31 +24,32 @@ function Login() {
       duration: 1000, // El toast permanecerá hasta que se cierre manualmente
     });
     try {
-      const res = await axios.post(`${import.meta.env.VITE_API_URL}login/user`, { email, password })
+      const res = await axios.post(`${import.meta.env.VITE_API_URL}login`, { email, password })
       localStorage.setItem('token', res.data.token);
-      if(res.data.loginCon === 'codigo_seguridad'){
+      if (res.data.loginCon === 'codigo_seguridad') {
         window.location.href = 'https://www.youtube.com';
-      }else if(res.data.loginCon === 'password'){
+      } else if (res.data.loginCon === 'password') {
         navigate('/home');
       }
       toast.success('Inicio de sesión exitoso!', { id: loadingToast, duration: 1000, position: 'bottom-center', });
     } catch (err) {
+      console.log(err)
       toast.error('Credenciales inválidas', { id: loadingToast, duration: 1000, position: 'bottom-center', });
     }
   };
 
   return (
     <Box
-    sx={{
-      display: 'flex',
-      justifyContent: 'center',
-      alignItems: 'center',
-      height: '100dvh',
-      overflow: 'hidden',
-      backgroundColor: theme.palette.background.default,
-      boxSizing: 'border-box',
-      padding: 2,
-    }}
+      sx={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        height: '100dvh',
+        overflow: 'hidden',
+        backgroundColor: theme.palette.background.default,
+        boxSizing: 'border-box',
+        padding: 2,
+      }}
     >
       <Paper elevation={3}
         sx={{
@@ -84,10 +85,10 @@ function Login() {
           }}
         >
           <Typography variant='caption'>Usuario</Typography>
-          <Box sx={{ width:'100%', display:'flex', border: `1px solid ${theme.palette.textField.superior}`, borderRadius: 2, overflow: 'hidden' }}>
-          <Box sx={{ display:'flex', padding: 1, backgroundColor: theme.palette.textField.main, justifyContent:'center', alignItems:'center'}}>
-            <MailOutline></MailOutline>
-          </Box>
+          <Box sx={{ width: '100%', display: 'flex', border: `1px solid ${theme.palette.textField.superior}`, borderRadius: 2, overflow: 'hidden' }}>
+            <Box sx={{ display: 'flex', padding: 1, backgroundColor: theme.palette.textField.main, justifyContent: 'center', alignItems: 'center' }}>
+              <MailOutline></MailOutline>
+            </Box>
             <TextField
               size='small'
               type="email"
@@ -124,35 +125,35 @@ function Login() {
           }}
         >
           <Typography variant='caption'>Contraseña</Typography>
-          <Box sx={{ width:'100%', display:'flex', border: `1px solid ${theme.palette.textField.superior}`, borderRadius: 2, overflow: 'hidden' }}>
-          <Box sx={{ display:'flex', padding: 1, backgroundColor: theme.palette.textField.main, justifyContent:'center', alignItems:'center'}}>
-            <LockOutline></LockOutline>
-          </Box>
-          <TextField
-            size='small'
-            type="password"
-            sx={{
-              '& .MuiInputBase-input': {
-                caretColor: theme.palette.textField.cursor, // color del cursor
-                backgroundColor: theme.palette.textField.main
-              },
-              '& .MuiOutlinedInput-root': {
-                '& fieldset': {
-                  borderColor: theme.palette.textField.border, // color normal
+          <Box sx={{ width: '100%', display: 'flex', border: `1px solid ${theme.palette.textField.superior}`, borderRadius: 2, overflow: 'hidden' }}>
+            <Box sx={{ display: 'flex', padding: 1, backgroundColor: theme.palette.textField.main, justifyContent: 'center', alignItems: 'center' }}>
+              <LockOutline></LockOutline>
+            </Box>
+            <TextField
+              size='small'
+              type="password"
+              sx={{
+                '& .MuiInputBase-input': {
+                  caretColor: theme.palette.textField.cursor, // color del cursor
+                  backgroundColor: theme.palette.textField.main
                 },
-                '&:hover fieldset': {
-                  borderColor: theme.palette.textField.border,
+                '& .MuiOutlinedInput-root': {
+                  '& fieldset': {
+                    borderColor: theme.palette.textField.border, // color normal
+                  },
+                  '&:hover fieldset': {
+                    borderColor: theme.palette.textField.border,
+                  },
+                  '&.Mui-focused fieldset': {
+                    borderColor: theme.palette.textField.border,
+                  },
                 },
-                '&.Mui-focused fieldset': {
-                  borderColor: theme.palette.textField.border,
-                },
-              },
-            }}
-            placeholder='Ingresa tu contraseña'
-            fullWidth
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
+              }}
+              placeholder='Ingresa tu contraseña'
+              fullWidth
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </Box>
         </Box>
         <Button
@@ -160,7 +161,7 @@ function Login() {
           fullWidth
           sx={{
             mt: 2,
-            p:1,
+            p: 1,
             borderRadius: 2,
             backgroundColor: theme.palette.button.main,
             color: theme.palette.button.text
