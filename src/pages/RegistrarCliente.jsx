@@ -13,7 +13,7 @@ import {
   Snackbar,
   Alert,
 } from '@mui/material';
-import axios from 'axios';
+import api from '../utils/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 import { ArrowBack } from '@mui/icons-material';
 import MapaCoordenadas from '../components/MapaCoordenadas';
@@ -62,9 +62,7 @@ const RegistrarCliente = () => {
   // Obtener rutas del usuario
   const fetchRutas = async () => {
     try {
-      const res = await axios.get(`${API_BASE}rutas/usuario/${user.userId}?page=1&limit=10`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get(`${API_BASE}rutas/usuario/${user.userId}?page=1&limit=10`);
       setRutas(res.data.data);
     } catch (err) {
       console.error('Error cargando rutas:', err);
@@ -111,12 +109,7 @@ const RegistrarCliente = () => {
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      await axios.post(`${API_BASE}clientes`, form, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      await api.post(`${API_BASE}clientes`, form);
 
       setSnackbar({
         open: true,

@@ -13,7 +13,7 @@ import {
   Pagination,
   Button,
 } from '@mui/material';
-import axios from 'axios';
+import api from '../utils/axiosInstance';
 import { useNavigate } from 'react-router-dom';
 
 const API_BASE = `${import.meta.env.VITE_API_URL}`;
@@ -39,10 +39,7 @@ const Gastos = () => {
   const fetchGastosDelDia = async (pageNumber = 1, search = '') => {
     setLoading(true);
     try {
-      const response = await axios.get(
-        `${API_BASE}caja/egresos-dia?page=${pageNumber}&limit=${limit}&search=${search}`,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
+      const response = await api.get(`${API_BASE}caja/egresos-dia?page=${pageNumber}&limit=${limit}&search=${search}`);
 
       const gastosHoy = response.data.data || [];
       setGastos(gastosHoy);

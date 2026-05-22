@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { RemoveRedEyeOutlined } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 import { useTheme } from '@mui/material/styles';
 
@@ -70,11 +70,7 @@ const Creditos = () => {
   };  
 
   const getConfigDefault = async ()=>{
-    await axios.get(`${import.meta.env.VITE_API_URL}/config/default`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }).then((response)=>{
+    await api.get(`${import.meta.env.VITE_API_URL}/config/default`).then((response)=>{
       setConfig(response.data)
     }).catch((error)=>{
       toast.error('Fallo de configuración')
@@ -87,9 +83,7 @@ const Creditos = () => {
     }
     setLoading(true);
     try {
-      const res = await axios.get(`${API_BASE}creditos/creditos-impagos?page=${pagina}&limit=${limit}&search=${search}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get(`${API_BASE}creditos/creditos-impagos?page=${pagina}&limit=${limit}&search=${search}`);
 
       const data = res.data.data;
       const pages = res.data.pagination.totalPages || 1;

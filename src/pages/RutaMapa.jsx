@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import RutaMap from '../components/RutaMap';
-import axios from 'axios';
+import api from '../utils/axiosInstance';
 import { jwtDecode } from 'jwt-decode';
 
 const RutaMapa = () => {
@@ -18,11 +18,7 @@ const RutaMapa = () => {
 
   const obtenerPuntos = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/rutas/${user.userId}/ruta`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get(`${import.meta.env.VITE_API_URL}/rutas/${user.userId}/ruta`);
       setPuntos(response.data); // Asegúrate que response.data sea el array que necesita RutaMap
     } catch (error) {
       console.error('Error al obtener los puntos de la ruta:', error);

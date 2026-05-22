@@ -17,7 +17,7 @@ import {
 } from '@mui/material';
 import { InfoOutlined } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 
 const API_BASE = `${import.meta.env.VITE_API_URL}`;
@@ -37,19 +37,17 @@ const Clientes = () => {
   const navigate = useNavigate();
 
   const fetchClientes = async () => {
-    setLoading(true);
-    try {
-      const res = await axios.get(`${API_BASE}clientes/ruta/${user.ruta[0].id}?page=${page}&limit=${limit}&search=${search}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setClientes(res.data.data)
-      setTotalPages(res.data.totalPages);
-    } catch (error) {
-      console.error('Error al cargar créditos:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const res = await api.get(`${API_BASE}clientes/ruta/${user.ruta[0].id}?page=${page}&limit=${limit}&search=${search}`);
+    setClientes(res.data.data);
+    setTotalPages(res.data.totalPages);
+  } catch (error) {
+    console.error('Error al cargar clientes:', error);
+  } finally {
+    setLoading(false);
+  }
+};
 
   useEffect(() => {
     const get = async()=>{

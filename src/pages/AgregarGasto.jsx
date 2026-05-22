@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { ArrowBack } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/axiosInstance';
 
 const API_BASE = `${import.meta.env.VITE_API_URL}`;
 
@@ -42,9 +42,7 @@ const AgregarGasto = () => {
   useEffect(() => {
     const fetchCategorias = async () => {
       try {
-        const response = await axios.get(`${API_BASE}config/gasto-categories`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await api.get(`${API_BASE}config/gasto-categories`);
         setCategorias(response.data.categorias);
       } catch (error) {
         console.error('Error al obtener las categorías:', error);
@@ -91,12 +89,7 @@ const AgregarGasto = () => {
     setLoading(true);
 
     try {
-      await axios.post(`${API_BASE}caja/egreso`, nuevoGasto, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      await api.post(`${API_BASE}caja/egreso`, nuevoGasto);
 
       setSuccess(true);
       setError('');

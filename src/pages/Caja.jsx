@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import IconApp from '../components/IconApp';
 import { DoubleArrow } from '@mui/icons-material';
-import axios from 'axios';
+import api from '../utils/axiosInstance';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import weekday from 'dayjs/plugin/weekday';
@@ -57,8 +57,7 @@ const Caja = () => {
   // Obtener los movimientos para la caja
   const getMovimientos = async (id, pageMov, limit) => {
     try {
-      const res = await axios.get(`${API_BASE}caja/movimientos`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await api.get(`${API_BASE}caja/movimientos`, {
         params: {
           turnoId: id,
           page: pageMov, // El backend espera que la página comience en 1
@@ -75,9 +74,7 @@ const Caja = () => {
   // Obtener el estado de la caja
   const obtenerCaja = async () => {
     try {
-      const response = await axios.get(`${API_BASE}caja/user/${user.userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get(`${API_BASE}caja/user/${user.userId}`);
       setCaja(response.data);
     } catch (err) {
       console.error(err);
@@ -87,9 +84,7 @@ const Caja = () => {
   // Obtener el turno activo
   const obtenerTurno = async (id) => {
     try {
-      const response = await axios.get(`${API_BASE}caja/turno/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await api.get(`${API_BASE}caja/turno/${id}`);
       await getMovimientos(response.data.id, page, 10)
     } catch (err) {
       setMovimientos([])

@@ -15,7 +15,7 @@ import {
     Button
 } from '@mui/material';
 import { Download } from '@mui/icons-material';
-import axios from 'axios';
+import api from '../utils/axiosInstance';
 import toast from 'react-hot-toast';
 
 const API_BASE = `${import.meta.env.VITE_API_URL}`;
@@ -50,11 +50,8 @@ const Pagos = () => {
                 toast.success('Descargando comprobante...');
             } else {
                 // In regular browser, use blob download
-                const response = await axios.get(`${API_BASE}caja/comprobante/${id}`, {
+                const response = await api.get(`${API_BASE}caja/comprobante/${id}`, {
                     responseType: 'blob',
-                    headers: {
-                        Authorization: `Bearer ${token}`,
-                    },
                 });
 
                 const blob = new Blob([response.data], { type: 'application/pdf' });
@@ -78,9 +75,7 @@ const Pagos = () => {
     // Obtener los pagos
     const getValidAbonosByTurno = async () => {
         try {
-            const res = await axios.get(`${API_BASE}caja/abonosValid-turno/${turnoId}?page=${page}&limit=10`, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
+            const res = await api.get(`${API_BASE}caja/abonosValid-turno/${turnoId}?page=${page}&limit=10`);
             setLoading(false)
             setTotalPages(res.data.totalPages)
             setAbonos(res.data.data); // Los movimientos de la página actual

@@ -17,7 +17,7 @@ import {
 import PropTypes, { element } from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
-import axios from 'axios';
+import api from '../utils/axiosInstance';
 import { jwtDecode } from 'jwt-decode';
 import toast from 'react-hot-toast';
 import { useTheme } from '@mui/material/styles';
@@ -94,11 +94,7 @@ const Ruta = () => {
       location: `${ubicacionActual.lat}`+','+`${ubicacionActual.lng}`
     }
 
-    const response = await axios.post(`${import.meta.env.VITE_API_URL}creditos/pagar`, pago, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }).then((response)=> {
+    const response = await api.post(`${import.meta.env.VITE_API_URL}/creditos/pagar`, pago).then((response)=> {
       toast.success('Se ha registrado el pago con éxito', {position:'bottom-center'})
       setRender(!render)
     })
@@ -137,11 +133,7 @@ const Ruta = () => {
 
   const obtenerPuntos = async () => {
     try {
-      const response = await axios.get(`${import.meta.env.VITE_API_URL}/rutas/${user.userId}/ruta`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await api.get(`${import.meta.env.VITE_API_URL}/rutas/${user.userId}/ruta`);
       setPuntos(response.data);
       setResults(response.data);
     } catch (error) {

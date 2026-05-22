@@ -22,7 +22,7 @@ import {
   DialogTitle,
   TextField
 } from '@mui/material';
-import axios from 'axios';
+import api from '../utils/axiosInstance';
 import { ArrowBack, Image as ImageIcon, Download, CurrencyExchange } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Slider from 'react-slick';
@@ -127,11 +127,7 @@ const InfoCredito = () => {
       location: `${ubicacionActual.lat}` + ',' + `${ubicacionActual.lng}`
     }
 
-    const response = await axios.post(`${import.meta.env.VITE_API_URL}creditos/pagar`, pago, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }).then((response) => {
+    const response = await api.post(`${import.meta.env.VITE_API_URL}/creditos/pagar`, pago).then((response) => {
       toast.success('Se ha registrado el pago con éxito', { position: 'bottom-center' })
       setRender(!render)
     })
@@ -165,11 +161,8 @@ const InfoCredito = () => {
         toast.success('Descargando comprobante...');
       } else {
         // In regular browser, use blob download
-        const response = await axios.get(`${API_BASE}caja/comprobante/${id}`, {
+        const response = await api.get(`${API_BASE}caja/comprobante/${id}`, {
           responseType: 'blob',
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
         });
 
         const blob = new Blob([response.data], { type: 'application/pdf' });
@@ -192,11 +185,7 @@ const InfoCredito = () => {
 
   //Obtener la configuracion de ruta por usuario
   const getRutaConfig = async () => {
-    await axios.get(`${API_BASE}config/ruta/${credito.detalles.cliente.rutaId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    }).then((response) => {
+    await api.get(`${API_BASE}config/ruta/${credito.detalles.cliente.rutaId}`).then((response) => {
       const monto_minimo = Number(response.data.monto_minimo) + (Number(credito.detalles.saldo_capital) + Number(credito.detalles.saldo_interes))
       const monto_maximo = Number(response.data.monto_maximo)
       setPlazoMaximo(response.data.plazo_maximo)

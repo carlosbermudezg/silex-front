@@ -18,7 +18,7 @@ import {
 } from '@mui/material';
 
 import { ArrowBack } from '@mui/icons-material';
-import axios from 'axios';
+import api from '../utils/axiosInstance';
 import { useTheme } from '@mui/material/styles';
 import { useNavigate } from 'react-router-dom';
 import { jwtDecode } from 'jwt-decode';
@@ -110,8 +110,7 @@ const RegistrarCredito = () => {
 
   const fetchRutas = async () => {
     try {
-      const res = await axios.get(`${API_BASE}rutas/usuario/${user.userId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await api.get(`${API_BASE}rutas/usuario/${user.userId}`, {
         params: { page: 1, limit: 10 },
       });
       setConfig(res.data.data[0].config)
@@ -125,8 +124,7 @@ const RegistrarCredito = () => {
     if (!rutaId) return;
     setLoadingClientes(true);
     try {
-      const res = await axios.get(`${API_BASE}clientes/ruta/${rutaId}`, {
-        headers: { Authorization: `Bearer ${token}` },
+      const res = await api.get(`${API_BASE}clientes/ruta/${rutaId}`, {
         params: { page: 1, limit: 10, search },
       });
       setClientes(res.data.data);
@@ -139,9 +137,7 @@ const RegistrarCredito = () => {
 
   const fetchProductosByRuta = async (rutaId) => {
     try {
-      const res = await axios.get(`${API_BASE}productos/ruta/${rutaId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get(`${API_BASE}productos/ruta/${rutaId}`);
       setProductos(res.data);
     } catch (err) {
       console.error('Error al obtener productos por ruta:', err);
@@ -150,9 +146,7 @@ const RegistrarCredito = () => {
 
   const fetchConfigCreditos = async (rutaId) => {
     try {
-      const res = await axios.get(`${API_BASE}config/ruta/${rutaId}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await api.get(`${API_BASE}config/ruta/${rutaId}`);
       setConfigCreditos(res.data);
     } catch (err) {
       console.error('Error al obtener configuración de créditos:', err);
@@ -279,12 +273,7 @@ const RegistrarCredito = () => {
   
       setLoading(true);
   
-      const response = await axios.post(`${API_BASE}creditos`, payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await api.post(`${API_BASE}creditos`, payload);
   
       if (response.status === 201) {
         setSnackbar({

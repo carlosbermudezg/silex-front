@@ -1,7 +1,7 @@
 // src/pages/Login.jsx
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/axiosInstance';
 import { Box, Button, Paper, TextField, Typography, Divider, Link } from '@mui/material';
 import { MailOutline, LockOutline, Google, Facebook, Face } from '@mui/icons-material';
 import toast from 'react-hot-toast';
@@ -25,11 +25,9 @@ function Login() {
       duration: 1000, // El toast permanecerá hasta que se cierre manualmente
     });
     try {
-       const res = await axios.post(
-         `${import.meta.env.VITE_API_URL}login`,
-         { email, password },
-         { headers: { 'x-tenant': company } }
-       )
+       const res = await api.post('login', { email, password, company }, {
+         headers: { 'x-tenant': company }
+       });
       localStorage.setItem('token', res.data.token);
       if (res.data.loginCon === 'codigo_seguridad') {
         window.location.href = 'https://www.youtube.com';

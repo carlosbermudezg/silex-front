@@ -7,7 +7,7 @@ import {
 } from '@mui/material';
 import { AttachMoney, CreditCard, DoubleArrow, MonetizationOn, MoneyOff } from '@mui/icons-material';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/axiosInstance';
 import { jwtDecode } from 'jwt-decode';
 import IconApp from '../components/IconApp';
 import dayjs from 'dayjs';
@@ -26,9 +26,7 @@ const Home = () => {
   // Obtener el dashboard
   const getDataDash = async () => {
     try {
-      const res = await axios.get(`${API_BASE}creditos/datadash?id=${user.ruta[0].id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const res = await api.get(`${API_BASE}creditos/datadash?id=${user.ruta[0].id}`);
       setDataDash(res.data)
       localStorage.setItem('turno', res?.data?.turno?.id)
     } catch (err) {
